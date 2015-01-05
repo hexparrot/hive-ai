@@ -52,9 +52,9 @@ class HiveBoard(object):
         
     def move(self, origin, dest):
         p = self.pop(origin)
-        try:
+        if dest in self._pieces:
             self._pieces[dest].append(p)
-        except KeyError:
+        else:
             self._pieces[dest] = [p]
 
 Tile = namedtuple('Tile', ['color', 'insect'])
