@@ -34,6 +34,14 @@ class HiveBoard(object):
         return self._pieces[key]
         
     def place(self, tile, coords):
+        if coords in self._pieces:
+            raise RuntimeError
         self._pieces[coords] = tile
+        
+    def piece_at(self, coords):
+        return self._pieces[coords]
+        
+    def stack_at(self, coords):
+        return self._pieces[coords]
 
 Tile = namedtuple('Tile', ['color', 'insect'])
