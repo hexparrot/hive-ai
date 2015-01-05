@@ -78,7 +78,20 @@ class TestHive(unittest.TestCase):
             
         self.assertEqual(board.piece_at((0,1)).color, hive.Color.White)
         self.assertEqual(board.piece_at((0,1)).insect, hive.Insect.Queen)
+    
+    def test_log(self):
+        board = hive.HiveBoard()
+        piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
         
+        board.place(piece, (0,0))
+        board.move((0,0), (0,1))
+        
+        self.assertIs(board._log[0].piece, piece)
+        self.assertEqual(board._log[0].origin, (0,0))
+        self.assertEqual(board._log[0].dest, None)
+        
+        self.assertEqual(board._log[1].origin, (0,0))
+        self.assertEqual(board._log[1].dest, (0,1))
 
 if __name__ == '__main__':
     unittest.main()

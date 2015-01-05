@@ -9,6 +9,9 @@ __email__ = "wdchromium@gmail.com"
 from enum import Enum
 from collections import namedtuple
 
+Tile = namedtuple('Tile', ['color', 'insect'])
+Log = namedtuple('Ply', ['piece', 'origin', 'dest'])
+
 class Insect(Enum):
     Queen = 0
     Ant = 1
@@ -26,6 +29,7 @@ class Color(Enum):
 class HiveBoard(object):
     def __init__(self):
         self._pieces = {}
+        self._log = []
         
     def __len__(self):
         return 0
@@ -37,6 +41,7 @@ class HiveBoard(object):
         if coords in self._pieces:
             raise RuntimeError
         self._pieces[coords] = [tile]
+        self._log.append(Log(tile, coords, None))
     
     def pop(self, coords):
         p = self._pieces[coords].pop()
@@ -56,5 +61,4 @@ class HiveBoard(object):
             self._pieces[dest].append(p)
         else:
             self._pieces[dest] = [p]
-
-Tile = namedtuple('Tile', ['color', 'insect'])
+        self._log.append(Log(p, origin, dest))
