@@ -35,6 +35,9 @@ class TestHive(unittest.TestCase):
         board = hive.HiveBoard()
         piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
         
+        with self.assertRaises(KeyError):
+            board.pop( (0,0) )
+        
         board.place(piece, (0,0) )
         p = board.pop( (0,0) )
         
@@ -42,6 +45,9 @@ class TestHive(unittest.TestCase):
         
         with self.assertRaises(KeyError):
             board.piece_at( (0,0) )
+
+        with self.assertRaises(KeyError):
+            board.pop( (0,0) )
 
     def test_piece_at(self):
         board = hive.HiveBoard()
