@@ -23,37 +23,37 @@ class TestHive(unittest.TestCase):
         board = hive.HiveBoard()
         piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
         
-        board.place(piece, (0,0) )
+        board.place(piece, (0,0))
         self.assertEqual(board.piece_at((0,0)).color, hive.Color.White)
         self.assertEqual(board.piece_at((0,0)).insect, hive.Insect.Queen)
         
         piece_2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
         with self.assertRaises(RuntimeError):
-            board.place(piece_2, (0,0) )
+            board.place(piece_2, (0,0))
             
     def test_pop(self):
         board = hive.HiveBoard()
         piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
         
         with self.assertRaises(KeyError):
-            board.pop( (0,0) )
+            board.pop((0,0))
         
-        board.place(piece, (0,0) )
-        p = board.pop( (0,0) )
+        board.place(piece, (0,0))
+        p = board.pop((0,0))
         
         self.assertIs(piece, p)
         
         with self.assertRaises(KeyError):
-            board.piece_at( (0,0) )
+            board.piece_at((0,0))
 
         with self.assertRaises(KeyError):
-            board.pop( (0,0) )
+            board.pop((0,0))
 
     def test_piece_at(self):
         board = hive.HiveBoard()
         piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
         
-        board.place(piece, (0,0) )
+        board.place(piece, (0,0))
         self.assertEqual(board.piece_at((0,0)).color, hive.Color.White)
         self.assertEqual(board.piece_at((0,0)).insect, hive.Insect.Queen)
     
@@ -62,9 +62,23 @@ class TestHive(unittest.TestCase):
         piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
         piece_2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
 
-        board.place(piece, (0,0) )
+        board.place(piece, (0,0))
         with self.assertRaises(RuntimeError):
-            board.place(piece_2, (0,0) )
+            board.place(piece_2, (0,0))
+            
+    def test_move(self):
+        board = hive.HiveBoard()
+        piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
+        
+        board.place(piece, (0,0))
+        board.move((0,0), (0,1))
+        
+        with self.assertRaises(KeyError):
+            board.piece_at((0,0))
+            
+        self.assertEqual(board.piece_at((0,1)).color, hive.Color.White)
+        self.assertEqual(board.piece_at((0,1)).insect, hive.Insect.Queen)
+        
 
 if __name__ == '__main__':
     unittest.main()

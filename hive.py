@@ -49,5 +49,12 @@ class HiveBoard(object):
         
     def stack_at(self, coords):
         return self._pieces[coords]
+        
+    def move(self, origin, dest):
+        p = self.pop(origin)
+        try:
+            self._pieces[dest].append(p)
+        except KeyError:
+            self._pieces[dest] = [p]
 
 Tile = namedtuple('Tile', ['color', 'insect'])
