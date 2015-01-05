@@ -36,10 +36,16 @@ class HiveBoard(object):
     def place(self, tile, coords):
         if coords in self._pieces:
             raise RuntimeError
-        self._pieces[coords] = tile
+        self._pieces[coords] = [tile]
+    
+    def pop(self, coords):
+        p = self._pieces[coords].pop()
+        if not self._pieces[coords]:
+            del self._pieces[coords]
+        return p
         
     def piece_at(self, coords):
-        return self._pieces[coords]
+        return self._pieces[coords][-1]
         
     def stack_at(self, coords):
         return self._pieces[coords]

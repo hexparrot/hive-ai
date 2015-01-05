@@ -12,9 +12,6 @@ class TestHive(unittest.TestCase):
     def test_board(self):
         board = hive.HiveBoard()
         self.assertEqual(len(board), 0)
-        
-        with self.assertRaises(KeyError):
-            board[(0,0)]
     
     def test_tiles(self):
         piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
@@ -27,13 +24,24 @@ class TestHive(unittest.TestCase):
         piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
         
         board.place(piece, (0,0) )
-        self.assertIsInstance(board[(0,0)], hive.Tile)
-        self.assertEqual(board[(0,0)].color, hive.Color.White)
-        self.assertEqual(board[(0,0)].insect, hive.Insect.Queen)
+        self.assertEqual(board.piece_at((0,0)).color, hive.Color.White)
+        self.assertEqual(board.piece_at((0,0)).insect, hive.Insect.Queen)
         
         piece_2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
         with self.assertRaises(RuntimeError):
             board.place(piece_2, (0,0) )
+            
+    def test_pop(self):
+        board = hive.HiveBoard()
+        piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
+        
+        board.place(piece, (0,0) )
+        p = board.pop( (0,0) )
+        
+        self.assertIs(piece, p)
+        
+        with self.assertRaises(KeyError):
+            board.piece_at( (0,0) )
 
     def test_piece_at(self):
         board = hive.HiveBoard()
