@@ -90,8 +90,17 @@ class TestHive(unittest.TestCase):
         self.assertEqual(board._log[0].origin, (0,0))
         self.assertEqual(board._log[0].dest, None)
         
+        self.assertIs(board._log[1].piece, piece)
         self.assertEqual(board._log[1].origin, (0,0))
         self.assertEqual(board._log[1].dest, (0,1))
+        
+        with self.assertRaises(KeyError):
+            board.move((0,0), (0,1))
+        
+        board.move((0,1), (1,1))
+        self.assertIs(board._log[2].piece, piece)
+        self.assertEqual(board._log[2].origin, (0,1))
+        self.assertEqual(board._log[2].dest, (1,1))
 
 if __name__ == '__main__':
     unittest.main()
