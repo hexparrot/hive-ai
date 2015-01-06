@@ -108,6 +108,11 @@ class TestHive(unittest.TestCase):
         self.assertIs(board._log[2].piece, piece)
         self.assertEqual(board._log[2].origin, (0,1))
         self.assertEqual(board._log[2].dest, (1,1))
+        
+    def test_hex_neighbors(self):
+        self.assertSetEqual(hive.HiveBoard.hex_neighbors((0,0)),
+                            set([(0,1), (1,1), (1,0), 
+                                 (0,-1), (-1,-1), (-1,0)]))
 
 if __name__ == '__main__':
     unittest.main()
