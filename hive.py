@@ -81,9 +81,6 @@ class HiveBoard(object):
         self._log.append(Log(p, origin, dest))
     
     @staticmethod
-    def hex_neighbors(origin):
-        return set([tuple(sum(x) for x in zip(origin, d.value)) 
-                for d in Flat_Directions])
-
-
-        
+    def hex_neighbors(tile_orientation, origin):
+        return set([tuple(sum(x) for x in zip(origin, d.value))
+                    for d in tile_orientation])

@@ -110,7 +110,8 @@ class TestHive(unittest.TestCase):
         self.assertEqual(board._log[2].dest, (1,1))
         
     def test_hex_neighbors(self):
-        self.assertSetEqual(hive.HiveBoard.hex_neighbors((0,0)),
+        board = hive.HiveBoard(hive.Flat_Directions)
+        self.assertSetEqual(board.hex_neighbors(board.tile_orientation, (0,0)),
                             set([(0,1), (1,1), (1,0), 
                                  (0,-1), (-1,-1), (-1,0)]))
 
