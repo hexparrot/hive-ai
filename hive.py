@@ -80,7 +80,35 @@ class HiveBoard(object):
             self._pieces[dest] = [p]
         self._log.append(Log(p, origin, dest))
     
+    def act(self, acting_piece_coords, origin, dest):
+        def queen_placed(color):
+            for stack in self._pieces.values():
+                if Tile(color, Insect.Queen) in stack:
+                    return True
+            return False
+            
+        acting_piece = self.piece_at(acting_piece_coords)
+
+        if origin and dest and \
+            not queen_placed(acting_piece.color):
+            raise IllegalMovement(acting_piece, origin, dest)
+    
     @staticmethod
     def hex_neighbors(tile_orientation, origin):
         return set([tuple(sum(x) for x in zip(origin, d.value))
                     for d in tile_orientation])
+
+class IllegalMovement(Exception):
+    def __init__(self, actor, origin, dest):
+        self.actor = actor
+        self.origin = origin
+        self.dest = dest
+        
+        self.message = 'Cannot move any pieces until Queen has been placed'
+
+class IllegalPlacement(Exception):
+    def __init__(self, actor, dest):
+        self.actor = actor
+        self.dest = dest
+        
+        self.message = 'Cannot place {0} at {1}'.format(actor, dest)

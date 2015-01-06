@@ -114,6 +114,23 @@ class TestHive(unittest.TestCase):
         self.assertSetEqual(board.hex_neighbors(board.tile_orientation, (0,0)),
                             set([(0,1), (1,1), (1,0), 
                                  (0,-1), (-1,-1), (-1,0)]))
+                                 
+    def test_prequeen_movement_rule(self):
+        board = hive.HiveBoard()
+
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Ant), (0,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Ant), (0,1))
+        
+        with self.assertRaises(hive.IllegalMovement):
+            board.act((0,0), (0,0), (0,1))
+        
+        with self.assertRaises(hive.IllegalMovement):
+            board.act((0,0), (0,0), (1,0))
+        
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,-1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Beetle), (1,-1))
+        board.act((1,-1), (1,-1), (1,0))
+        
 
 if __name__ == '__main__':
     unittest.main()
