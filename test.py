@@ -11,7 +11,6 @@ class TestHive(unittest.TestCase):
     
     def test_board(self):
         board = hive.HiveBoard()
-        self.assertEqual(len(board), 0)
         self.assertIs(board.tile_orientation, hive.Flat_Directions)
         
         board = hive.HiveBoard(hive.Flat_Directions)
@@ -112,8 +111,8 @@ class TestHive(unittest.TestCase):
     def test_hex_neighbors(self):
         board = hive.HiveBoard(hive.Flat_Directions)
         self.assertSetEqual(board.hex_neighbors(board.tile_orientation, (0,0)),
-                            set([(0,1), (1,1), (1,0), 
-                                 (0,-1), (-1,-1), (-1,0)]))
+                            set([(0,-1), (1,-1), (1,0), 
+                                 (0,1), (-1,1), (-1,0)]))
                                  
     def test_prequeen_movement_rule(self):
         board = hive.HiveBoard()
@@ -130,6 +129,22 @@ class TestHive(unittest.TestCase):
         board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,-1))
         board.place(hive.Tile(hive.Color.White, hive.Insect.Beetle), (1,-1))
         board.act((1,-1), (1,-1), (1,0))
+        
+    def test_adjacent_placement(self):
+        board = hive.HiveBoard()
+        
+        board.act(None, None, (0,0), hive.Tile(hive.Color.White, hive.Insect.Ant))
+        board.act(None, None, (0,1), hive.Tile(hive.Color.Black, hive.Insect.Ant))
+        
+        with self.assertRaises(hive.IllegalPlacement):
+            board.act(None, None, (0,2), hive.Tile(hive.Color.White, hive.Insect.Beetle))
+        
+        board.act(None, None, (1,-1), hive.Tile(hive.Color.White, hive.Insect.Beetle))
+        
+        with self.assertRaises(hive.IllegalPlacement):
+            board.act(None, None, (2,-2), hive.Tile(hive.Color.Black, hive.Insect.Spider))
+        
+        
         
 
 if __name__ == '__main__':

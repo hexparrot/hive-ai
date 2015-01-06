@@ -35,11 +35,11 @@ class Pointed_Directions(Enum):
     NW = (0,-1)
     
 class Flat_Directions(Enum):
-    N = (0,1)
-    NE = (1,1)
+    N = (0,-1)
+    NE = (1,-1)
     SE = (1,0)
-    S = (0,-1)
-    SW = (-1,-1)
+    S = (0,1)
+    SW = (-1,1)
     NW = (-1,0)
 
 class HiveBoard(object):
@@ -47,10 +47,7 @@ class HiveBoard(object):
         self._pieces = {}
         self._log = []
         self.tile_orientation = tile_orientation
-        
-    def __len__(self):
-        return 0
-        
+
     def __getitem__(self, key):
         return self._pieces[key]
         
@@ -80,19 +77,40 @@ class HiveBoard(object):
             self._pieces[dest] = [p]
         self._log.append(Log(p, origin, dest))
     
-    def act(self, acting_piece_coords, origin, dest):
+    def act(self, acting_piece_coords, origin, dest, new_piece=None):
         def queen_placed(color):
             for stack in self._pieces.values():
                 if Tile(color, Insect.Queen) in stack:
                     return True
             return False
             
-        acting_piece = self.piece_at(acting_piece_coords)
+        def placed_adjacent_to_opponent(color):
+            for c in self.hex_neighbors(self.tile_orientation, dest):
+                if c in self._pieces:
+                    if self.piece_at(c).color != color:
+                        return True
+            return False
 
-        if origin and dest and \
-            not queen_placed(acting_piece.color):
-            raise IllegalMovement(acting_piece, origin, dest)
-    
+        if new_piece: #if introducting a new tile to the game
+            if len(self._log) == 0:
+                self.place(new_piece, dest)
+            elif len(self._log) == 1:
+                if not placed_adjacent_to_opponent(new_piece.color):
+                    raise IllegalPlacement(new_piece, dest)
+                else:
+                    self.place(new_piece, dest)
+            else:
+                if placed_adjacent_to_opponent(new_piece.color):
+                    raise IllegalPlacement(new_piece, dest)
+                else:
+                    self.place(new_piece, dest)
+        else: #if a movement instead
+            acting_piece = self.piece_at(origin)
+            if not queen_placed(acting_piece.color):
+                raise IllegalMovement(acting_piece, origin, dest)
+            else:
+                self.move(origin, dest)
+        
     @staticmethod
     def hex_neighbors(tile_orientation, origin):
         return set([tuple(sum(x) for x in zip(origin, d.value))
