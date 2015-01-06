@@ -25,6 +25,22 @@ class Insect(Enum):
 class Color(Enum):
     White = 0
     Black = 1
+    
+class Pointed_Directions(Enum):
+    NE = (1,-1)
+    E = (1,0)
+    SE = (0,1)
+    SW = (-1,1)
+    W = (-1,0)
+    NW = (0,-1)
+    
+class Flat_Directions(Enum):
+    N = (0,1)
+    NE = (1,1)
+    SE = (1,0)
+    S = (0,-1)
+    SW = (-1,-1)
+    NW = (-1,0)
 
 class HiveBoard(object):
     def __init__(self):
