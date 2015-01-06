@@ -12,6 +12,13 @@ class TestHive(unittest.TestCase):
     def test_board(self):
         board = hive.HiveBoard()
         self.assertEqual(len(board), 0)
+        self.assertIs(board.tile_orientation, hive.Flat_Directions)
+        
+        board = hive.HiveBoard(hive.Flat_Directions)
+        self.assertIs(board.tile_orientation, hive.Flat_Directions)
+        
+        board = hive.HiveBoard(hive.Pointed_Directions)
+        self.assertIs(board.tile_orientation, hive.Pointed_Directions)
     
     def test_tiles(self):
         piece = hive.Tile(hive.Color.White, hive.Insect.Queen)

@@ -43,9 +43,10 @@ class Flat_Directions(Enum):
     NW = (-1,0)
 
 class HiveBoard(object):
-    def __init__(self):
+    def __init__(self, tile_orientation = Flat_Directions):
         self._pieces = {}
         self._log = []
+        self.tile_orientation = tile_orientation
         
     def __len__(self):
         return 0
