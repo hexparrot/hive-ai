@@ -100,6 +100,10 @@ class HiveBoard(object):
                     self.place(ply.tile, ply.dest)
                 else:
                     raise IllegalPlacement(ply.tile, ply.dest)
+            elif len(self._log) in [6,7] and \
+                not queen_placed(ply.tile.color) and \
+                ply.tile.insect != Insect.Queen:
+                    raise IllegalPlacement(ply.tile, ply.dest) 
             else:
                 if placed_adjacent_to_opponent(ply.tile.color):
                     raise IllegalPlacement(ply.tile, ply.dest)
@@ -111,7 +115,7 @@ class HiveBoard(object):
                           self.piece_at(ply.origin),
                           ply.origin,
                           ply.dest)
-
+                          
             if not queen_placed(ply.tile.color):
                 raise IllegalMovement(ply.tile,
                                       ply.origin,

@@ -139,6 +139,55 @@ class TestHive(unittest.TestCase):
             
         p3_b = hive.Ply(hive.Rule.Place, t3, None, (0,-1))
         board.perform(p3_b)
+    
+    def test_rule_placed_queen_by_fourth_action(self):
+        board = hive.HiveBoard()
+        
+        t1 = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p1 = hive.Ply(hive.Rule.Place, t1, None, (0,0))
+
+        t2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
+        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
+
+        t3 = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p3 = hive.Ply(hive.Rule.Place, t3, None, (0,-1))
+        
+        t4 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
+        p4 = hive.Ply(hive.Rule.Place, t4, None, (0,2))
+
+        t5 = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p5 = hive.Ply(hive.Rule.Place, t5, None, (0,-2))
+        
+        t6 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
+        p6 = hive.Ply(hive.Rule.Place, t6, None, (0,3))
+        
+        t7_a = hive.Tile(hive.Color.White, hive.Insect.Spider)
+        p7_a = hive.Ply(hive.Rule.Place, t7_a, None, (0,-3))
+        
+        t7_b = hive.Tile(hive.Color.White, hive.Insect.Queen)
+        p7_b = hive.Ply(hive.Rule.Place, t7_b, None, (0,-3))
+        
+        t8_a = hive.Tile(hive.Color.Black, hive.Insect.Spider)
+        p8_a = hive.Ply(hive.Rule.Place, t8_a, None, (0,4))
+        
+        t8_b = hive.Tile(hive.Color.Black, hive.Insect.Queen)
+        p8_b = hive.Ply(hive.Rule.Place, t8_b, None, (0,4))
+        
+        board.perform(p1)
+        board.perform(p2)
+        board.perform(p3)
+        board.perform(p4)
+        board.perform(p5)
+        board.perform(p6)
+        with self.assertRaises(hive.IllegalPlacement):
+            board.perform(p7_a)
+        
+        board.perform(p7_b)
+        
+        with self.assertRaises(hive.IllegalPlacement):
+            board.perform(p8_a)
+        
+        board.perform(p8_b)
         
     def test_hex_neighbors(self):
         board = hive.HiveBoard(hive.Flat_Directions)
