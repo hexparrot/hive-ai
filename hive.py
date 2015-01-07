@@ -157,6 +157,11 @@ class HiveBoard(object):
     def hex_neighbors(tile_orientation, origin):
         return set([tuple(sum(x) for x in zip(origin, d.value))
                     for d in tile_orientation])
+                        
+    @staticmethod
+    def hex_distance(origin, dest):
+        return (abs(origin[0] - dest[0]) + abs(origin[1] - dest[1]) + \
+                abs(origin[0] + origin[1] - dest[0] - dest[1])) / 2
 
 class IllegalMovement(Exception):
     def __init__(self, actor, origin, dest):

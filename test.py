@@ -255,6 +255,13 @@ class TestHive(unittest.TestCase):
         board.perform(p5)
         with self.assertRaises(hive.IllegalMovement):
             board.perform(p6)
+            
+    def test_hex_distance(self):
+        self.assertEqual(hive.HiveBoard.hex_distance((0,0), (0,1)), 1)
+        self.assertEqual(hive.HiveBoard.hex_distance((0,0), (-1,1)), 1)
+        self.assertEqual(hive.HiveBoard.hex_distance((0,0), (-5,5)), 5)
+        self.assertEqual(hive.HiveBoard.hex_distance((0,0), (5,-5)), 5)
+        self.assertEqual(hive.HiveBoard.hex_distance((0,0), (2,-3)), 3)
         
     def test_hex_neighbors(self):
         board = hive.HiveBoard(hive.Flat_Directions)
