@@ -48,10 +48,13 @@ class Rule(Enum):
     External_Move = 2
 
 class HiveBoard(object):
-    def __init__(self, tile_orientation=Flat_Directions):
+    def __init__(self,
+                 tile_orientation=Flat_Directions,
+                 queen_opening_allowed=False):
         self._pieces = {}
         self._log = []
         self.tile_orientation = tile_orientation
+        self.queen_opening_allowed = queen_opening_allowed
 
     def __getitem__(self, key):
         return self._pieces[key]
@@ -93,9 +96,18 @@ class HiveBoard(object):
                     if self.piece_at(c).color != color:
                         return True
             return False
+            
+        def opening_okay():
+            if len(self._log) in [0,1] and \
+                not self.queen_opening_allowed and \
+                ply.tile.insect == Insect.Queen:
+                return False
+            return True
 
         if ply.rule == Rule.Place:
-            if len(self._log) == 1:
+            if not opening_okay():
+                raise IllegalPlacement(ply.tile, ply.dest)
+            elif len(self._log) == 1:
                 if placed_adjacent_to_opponent(ply.tile.color):
                     self.place(ply.tile, ply.dest)
                 else:

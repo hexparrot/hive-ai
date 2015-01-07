@@ -90,7 +90,7 @@ class TestHive(unittest.TestCase):
     def test_perform(self):
         board = hive.HiveBoard()
         
-        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
+        t = hive.Tile(hive.Color.White, hive.Insect.Ant)
         p = hive.Ply(hive.Rule.Place, t, None, (0,0))
         
         board.perform(p)
@@ -98,11 +98,12 @@ class TestHive(unittest.TestCase):
         self.assertIsInstance(board._log[0], hive.Ply)
         self.assertEqual(board._log[0].tile, t)
         
-        p2 = hive.Ply(hive.Rule.Move, None, (0,0), (0,1))
+        t2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
+        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
         board.perform(p2)
         
         self.assertIsInstance(board._log[1], hive.Ply)
-        self.assertEqual(board._log[1].tile, t)
+        self.assertEqual(board._log[1].tile, t2)
         
     def test_rule_movement_before_queen_placed(self):
         board = hive.HiveBoard()
@@ -188,6 +189,27 @@ class TestHive(unittest.TestCase):
             board.perform(p8_a)
         
         board.perform(p8_b)
+        
+    def test_special_rules(self):
+        '''includes tourney rules about queen not available on move 1'''
+        board = hive.HiveBoard(queen_opening_allowed=False)
+        
+        t1_a = hive.Tile(hive.Color.White, hive.Insect.Queen)
+        p1_a = hive.Ply(hive.Rule.Place, t1_a, None, (0,0))
+        
+        with self.assertRaises(hive.IllegalPlacement):
+            board.perform(p1_a)
+            
+        t1_z = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p1_z = hive.Ply(hive.Rule.Place, t1_z, None, (0,0))
+        
+        board.perform(p1_z)
+        
+        t2_a = hive.Tile(hive.Color.Black, hive.Insect.Queen)
+        p2_a = hive.Ply(hive.Rule.Place, t2_a, None, (0,1))
+        
+        with self.assertRaises(hive.IllegalPlacement):
+            board.perform(p2_a)
         
     def test_hex_neighbors(self):
         board = hive.HiveBoard(hive.Flat_Directions)
