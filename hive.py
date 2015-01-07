@@ -94,19 +94,19 @@ class HiveBoard(object):
                         return True
             return False
             
-        def opening_okay():
+        def opening_invalid():
             if self.ply_number in [0,1] and \
                 not self.queen_opening_allowed and \
                 ply.tile.insect == Insect.Queen:
-                return False
-            return True
+                return True
+            return False
             
-        def fourth_move_okay():
+        def fourth_move_invalid():
             if self.ply_number in [6,7] and \
                 not queen_placed(ply.tile.color) and \
                 ply.tile.insect != Insect.Queen:
-                return False
-            return True
+                return True
+            return False
             
         def invalid_climb():
             if self.piece_at(ply.dest) and \
@@ -115,14 +115,14 @@ class HiveBoard(object):
             return False
 
         if ply.rule == Rule.Place:
-            if not opening_okay():
+            if opening_invalid():
                 raise IllegalPlacement(ply.tile, ply.dest)
             elif self.ply_number == 1:
                 if placed_adjacent_to_opponent(ply.tile.color):
                     self.place(ply.tile, ply.dest)
                 else:
                     raise IllegalPlacement(ply.tile, ply.dest)
-            elif not fourth_move_okay():
+            elif fourth_move_invalid():
                 raise IllegalPlacement(ply.tile, ply.dest) 
             else:
                 if placed_adjacent_to_opponent(ply.tile.color):
