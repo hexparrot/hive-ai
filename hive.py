@@ -80,21 +80,7 @@ class HiveBoard(object):
     def stack_at(self, coords):
         return self._pieces[coords]
         
-    def perform(self, ply):
-        if ply.rule == Rule.Place:
-            self.place(ply.tile, ply.dest)
-        elif ply.rule == Rule.Move:
-            if ply.tile is None:
-                ply = Ply(ply.rule,
-                          self.piece_at(ply.origin),
-                          ply.origin,
-                          ply.dest)
-            else:
-                self.move(ply.origin, ply.dest)
-
-        self._log.append(ply)
-    
-    def check(self, ply):
+    def perform(self, ply):    
         def queen_placed(color):
             for stack in self._pieces.values():
                 if Tile(color, Insect.Queen) in stack:
@@ -107,7 +93,25 @@ class HiveBoard(object):
                     if self.piece_at(c).color != color:
                         return True
             return False
-    
+
+        if ply.rule == Rule.Place:
+            self.place(ply.tile, ply.dest)
+        elif ply.rule == Rule.Move:
+            if ply.tile is None:
+                ply = Ply(ply.rule,
+                          self.piece_at(ply.origin),
+                          ply.origin,
+                          ply.dest)
+
+            if not queen_placed(ply.tile.color):
+                raise IllegalMovement(ply.tile,
+                                      ply.origin,
+                                      ply.dest)
+
+            self.move(ply.origin, ply.dest)
+
+        self._log.append(ply)
+
     @staticmethod
     def hex_neighbors(tile_orientation, origin):
         return set([tuple(sum(x) for x in zip(origin, d.value))

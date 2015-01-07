@@ -104,6 +104,24 @@ class TestHive(unittest.TestCase):
         self.assertIsInstance(board._log[1], hive.Ply)
         self.assertEqual(board._log[1].tile, t)
         
+    def test_rule_movement_before_queen_placed(self):
+        board = hive.HiveBoard()
+        
+        t = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
+        
+        board.perform(p)
+        
+        t2 = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
+        
+        board.perform(p2)
+        
+        p3 = hive.Ply(hive.Rule.Move, None, (0,1), (1,0))
+        
+        with self.assertRaises(hive.IllegalMovement):
+            board.perform(p3)
+        
     def test_hex_neighbors(self):
         board = hive.HiveBoard(hive.Flat_Directions)
         self.assertSetEqual(board.hex_neighbors(board.tile_orientation, (0,0)),
