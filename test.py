@@ -27,27 +27,29 @@ class TestHive(unittest.TestCase):
         
     def test_place(self):
         board = hive.HiveBoard()
-        piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
         
-        board.place(piece, (0,0))
-        self.assertEqual(board.piece_at((0,0)).color, hive.Color.White)
-        self.assertEqual(board.piece_at((0,0)).insect, hive.Insect.Queen)
+        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
         
-        piece_2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
+        board.place(t, (0,0))
+        self.assertEqual(board.piece_at((0,0)).color, t.color)
+        self.assertEqual(board.piece_at((0,0)).insect, t.insect)
+        
+        t2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
+
         with self.assertRaises(RuntimeError):
-            board.place(piece_2, (0,0))
+            board.place(t2, (0,0))
             
     def test_pop(self):
         board = hive.HiveBoard()
-        piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
+        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
         
         with self.assertRaises(KeyError):
             board.pop((0,0))
         
-        board.place(piece, (0,0))
+        board.place(t, (0,0))
         p = board.pop((0,0))
         
-        self.assertIs(piece, p)
+        self.assertIs(t, p)
         
         with self.assertRaises(KeyError):
             board.piece_at((0,0))
@@ -84,68 +86,114 @@ class TestHive(unittest.TestCase):
             
         self.assertEqual(board.piece_at((0,1)).color, hive.Color.White)
         self.assertEqual(board.piece_at((0,1)).insect, hive.Insect.Queen)
-    
-    def test_log(self):
+        
+    def test_perform(self):
         board = hive.HiveBoard()
-        piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
         
-        board.place(piece, (0,0))
-        board.move((0,0), (0,1))
+        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
+        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
         
-        self.assertIs(board._log[0].piece, piece)
-        self.assertEqual(board._log[0].origin, (0,0))
-        self.assertEqual(board._log[0].dest, None)
+        board.perform(p)
         
-        self.assertIs(board._log[1].piece, piece)
-        self.assertEqual(board._log[1].origin, (0,0))
-        self.assertEqual(board._log[1].dest, (0,1))
+        self.assertIsInstance(board._log[0], hive.Ply)
+        self.assertEqual(board._log[0].tile, t)
         
-        with self.assertRaises(KeyError):
-            board.move((0,0), (0,1))
+        p2 = hive.Ply(hive.Rule.Move, None, (0,0), (0,1))
+        board.perform(p2)
         
-        board.move((0,1), (1,1))
-        self.assertIs(board._log[2].piece, piece)
-        self.assertEqual(board._log[2].origin, (0,1))
-        self.assertEqual(board._log[2].dest, (1,1))
+        self.assertIsInstance(board._log[1], hive.Ply)
+        self.assertEqual(board._log[1].tile, t)
+        
+    def test_rule_movement_before_queen_placed(self):
+        board = hive.HiveBoard()
+
+        t = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
+        board.perform(p)
+        
+        t2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
+        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
+        board.perform(p2)
+        
+        p3 = hive.Ply(hive.Rule.Move, None, (0,0), (1,0))
+        
+        with self.assertRaises(hive.IllegalMovement):
+            board.perform(p3)
+            
+    def test_rule_adjacency_to_opponent(self):
+        board = hive.HiveBoard()
+        
+        t = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
+        board.perform(p)
+        
+        t2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
+        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
+        board.perform(p2)
+        
+        t3 = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p3_a = hive.Ply(hive.Rule.Place, t3, None, (0,2))
+        
+        with self.assertRaises(hive.IllegalPlacement):
+            board.perform(p3_a)
+            
+        p3_b = hive.Ply(hive.Rule.Place, t3, None, (0,-1))
+        board.perform(p3_b)
+    
+    def test_rule_placed_queen_by_fourth_action(self):
+        board = hive.HiveBoard()
+        
+        t1 = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p1 = hive.Ply(hive.Rule.Place, t1, None, (0,0))
+
+        t2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
+        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
+
+        t3 = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p3 = hive.Ply(hive.Rule.Place, t3, None, (0,-1))
+        
+        t4 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
+        p4 = hive.Ply(hive.Rule.Place, t4, None, (0,2))
+
+        t5 = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p5 = hive.Ply(hive.Rule.Place, t5, None, (0,-2))
+        
+        t6 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
+        p6 = hive.Ply(hive.Rule.Place, t6, None, (0,3))
+        
+        t7_a = hive.Tile(hive.Color.White, hive.Insect.Spider)
+        p7_a = hive.Ply(hive.Rule.Place, t7_a, None, (0,-3))
+        
+        t7_b = hive.Tile(hive.Color.White, hive.Insect.Queen)
+        p7_b = hive.Ply(hive.Rule.Place, t7_b, None, (0,-3))
+        
+        t8_a = hive.Tile(hive.Color.Black, hive.Insect.Spider)
+        p8_a = hive.Ply(hive.Rule.Place, t8_a, None, (0,4))
+        
+        t8_b = hive.Tile(hive.Color.Black, hive.Insect.Queen)
+        p8_b = hive.Ply(hive.Rule.Place, t8_b, None, (0,4))
+        
+        board.perform(p1)
+        board.perform(p2)
+        board.perform(p3)
+        board.perform(p4)
+        board.perform(p5)
+        board.perform(p6)
+        with self.assertRaises(hive.IllegalPlacement):
+            board.perform(p7_a)
+        
+        board.perform(p7_b)
+        
+        with self.assertRaises(hive.IllegalPlacement):
+            board.perform(p8_a)
+        
+        board.perform(p8_b)
         
     def test_hex_neighbors(self):
         board = hive.HiveBoard(hive.Flat_Directions)
         self.assertSetEqual(board.hex_neighbors(board.tile_orientation, (0,0)),
                             set([(0,-1), (1,-1), (1,0), 
                                  (0,1), (-1,1), (-1,0)]))
-                                 
-    def test_prequeen_movement_rule(self):
-        board = hive.HiveBoard()
-
-        board.place(hive.Tile(hive.Color.White, hive.Insect.Ant), (0,0))
-        board.place(hive.Tile(hive.Color.Black, hive.Insect.Ant), (0,1))
-        
-        with self.assertRaises(hive.IllegalMovement):
-            board.act((0,0), (0,0), (0,1))
-        
-        with self.assertRaises(hive.IllegalMovement):
-            board.act((0,0), (0,0), (1,0))
-        
-        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,-1))
-        board.place(hive.Tile(hive.Color.White, hive.Insect.Beetle), (1,-1))
-        board.act((1,-1), (1,-1), (1,0))
-        
-    def test_adjacent_placement(self):
-        board = hive.HiveBoard()
-        
-        board.act(None, None, (0,0), hive.Tile(hive.Color.White, hive.Insect.Ant))
-        board.act(None, None, (0,1), hive.Tile(hive.Color.Black, hive.Insect.Ant))
-        
-        with self.assertRaises(hive.IllegalPlacement):
-            board.act(None, None, (0,2), hive.Tile(hive.Color.White, hive.Insect.Beetle))
-        
-        board.act(None, None, (1,-1), hive.Tile(hive.Color.White, hive.Insect.Beetle))
-        
-        with self.assertRaises(hive.IllegalPlacement):
-            board.act(None, None, (2,-2), hive.Tile(hive.Color.Black, hive.Insect.Spider))
-        
-        
-        
 
 if __name__ == '__main__':
     unittest.main()

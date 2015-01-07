@@ -9,8 +9,8 @@ __email__ = "wdchromium@gmail.com"
 from enum import Enum
 from collections import namedtuple
 
-Tile = namedtuple('Tile', ['color', 'insect'])
-Log = namedtuple('Ply', ['piece', 'origin', 'dest'])
+Tile = namedtuple('Tile', 'color insect')
+Ply = namedtuple('Ply', 'rule tile origin dest')
 
 class Insect(Enum):
     Queen = 0
@@ -41,9 +41,14 @@ class Flat_Directions(Enum):
     S = (0,1)
     SW = (-1,1)
     NW = (-1,0)
+    
+class Rule(Enum):
+    Place = 0
+    Move = 1
+    External_Move = 2
 
 class HiveBoard(object):
-    def __init__(self, tile_orientation = Flat_Directions):
+    def __init__(self, tile_orientation=Flat_Directions):
         self._pieces = {}
         self._log = []
         self.tile_orientation = tile_orientation
@@ -51,12 +56,18 @@ class HiveBoard(object):
     def __getitem__(self, key):
         return self._pieces[key]
         
+    def move(self, origin, dest):
+        t = self.pop(origin)
+        if dest in self._pieces:
+            self._pieces[dest].append(t)
+        else:
+            self._pieces[dest] = [t]
+        
     def place(self, tile, coords):
         if coords in self._pieces:
             raise RuntimeError
         self._pieces[coords] = [tile]
-        self._log.append(Log(tile, coords, None))
-    
+
     def pop(self, coords):
         p = self._pieces[coords].pop()
         if not self._pieces[coords]:
@@ -69,15 +80,7 @@ class HiveBoard(object):
     def stack_at(self, coords):
         return self._pieces[coords]
         
-    def move(self, origin, dest):
-        p = self.pop(origin)
-        if dest in self._pieces:
-            self._pieces[dest].append(p)
-        else:
-            self._pieces[dest] = [p]
-        self._log.append(Log(p, origin, dest))
-    
-    def act(self, acting_piece_coords, origin, dest, new_piece=None):
+    def perform(self, ply):    
         def queen_placed(color):
             for stack in self._pieces.values():
                 if Tile(color, Insect.Queen) in stack:
@@ -85,32 +88,43 @@ class HiveBoard(object):
             return False
             
         def placed_adjacent_to_opponent(color):
-            for c in self.hex_neighbors(self.tile_orientation, dest):
+            for c in self.hex_neighbors(self.tile_orientation, ply.dest):
                 if c in self._pieces:
                     if self.piece_at(c).color != color:
                         return True
             return False
 
-        if new_piece: #if introducting a new tile to the game
-            if len(self._log) == 0:
-                self.place(new_piece, dest)
-            elif len(self._log) == 1:
-                if not placed_adjacent_to_opponent(new_piece.color):
-                    raise IllegalPlacement(new_piece, dest)
+        if ply.rule == Rule.Place:
+            if len(self._log) == 1:
+                if placed_adjacent_to_opponent(ply.tile.color):
+                    self.place(ply.tile, ply.dest)
                 else:
-                    self.place(new_piece, dest)
+                    raise IllegalPlacement(ply.tile, ply.dest)
+            elif len(self._log) in [6,7] and \
+                not queen_placed(ply.tile.color) and \
+                ply.tile.insect != Insect.Queen:
+                    raise IllegalPlacement(ply.tile, ply.dest) 
             else:
-                if placed_adjacent_to_opponent(new_piece.color):
-                    raise IllegalPlacement(new_piece, dest)
+                if placed_adjacent_to_opponent(ply.tile.color):
+                    raise IllegalPlacement(ply.tile, ply.dest)
                 else:
-                    self.place(new_piece, dest)
-        else: #if a movement instead
-            acting_piece = self.piece_at(origin)
-            if not queen_placed(acting_piece.color):
-                raise IllegalMovement(acting_piece, origin, dest)
-            else:
-                self.move(origin, dest)
-        
+                    self.place(ply.tile, ply.dest)
+        elif ply.rule == Rule.Move:
+            if ply.tile is None:
+                ply = Ply(ply.rule,
+                          self.piece_at(ply.origin),
+                          ply.origin,
+                          ply.dest)
+                          
+            if not queen_placed(ply.tile.color):
+                raise IllegalMovement(ply.tile,
+                                      ply.origin,
+                                      ply.dest)
+
+            self.move(ply.origin, ply.dest)
+
+        self._log.append(ply)
+
     @staticmethod
     def hex_neighbors(tile_orientation, origin):
         return set([tuple(sum(x) for x in zip(origin, d.value))
