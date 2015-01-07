@@ -55,9 +55,6 @@ class HiveBoard(object):
         self._log = []
         self.tile_orientation = tile_orientation
         self.queen_opening_allowed = queen_opening_allowed
-
-    def __getitem__(self, key):
-        return self._pieces[key]
         
     def move(self, origin, dest):
         t = self.pop(origin)
