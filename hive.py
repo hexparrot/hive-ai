@@ -113,6 +113,14 @@ class HiveBoard(object):
                 ply.tile.insect != Insect.Beetle:
                 return True
             return False
+        
+        def single_hex_movement_violated():
+            if ply.tile.insect in [Insect.Queen,
+                                   Insect.Beetle,
+                                   Insect.Pillbug] and \
+                self.hex_distance(ply.origin, ply.dest) != 1:
+                return True
+            return False
 
         if ply.rule == Rule.Place:
             if opening_invalid():
@@ -144,6 +152,10 @@ class HiveBoard(object):
                 raise IllegalMovement(ply.tile,
                                       ply.origin,
                                       ply.dest)
+            elif single_hex_movement_violated():
+                raise IllegalMovement(ply.tile,
+                                      ply.origin,
+                                      ply.dest)
             else:
                 self.move(ply.origin, ply.dest)
 
@@ -160,6 +172,7 @@ class HiveBoard(object):
                         
     @staticmethod
     def hex_distance(origin, dest):
+        #http://www.redblobgames.com/grids/hexagons/#distances
         return (abs(origin[0] - dest[0]) + abs(origin[1] - dest[1]) + \
                 abs(origin[0] + origin[1] - dest[0] - dest[1])) / 2
 

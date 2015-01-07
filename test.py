@@ -256,6 +256,28 @@ class TestHive(unittest.TestCase):
         with self.assertRaises(hive.IllegalMovement):
             board.perform(p6)
             
+    def test_single_hex_movement_checked(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        
+        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
+        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
+        t2 = hive.Tile(hive.Color.Black, hive.Insect.Queen)
+        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
+        t3 = hive.Tile(hive.Color.White, hive.Insect.Beetle)
+        p3 = hive.Ply(hive.Rule.Place, t3, None, (0,-1))
+        t4 = hive.Tile(hive.Color.Black, hive.Insect.Spider)
+        p4 = hive.Ply(hive.Rule.Place, t4, None, (0,2))
+        
+        for e in [p, p2, p3, p4]:
+            board.perform(e)
+        
+        with self.assertRaises(hive.IllegalMovement):
+            board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,2)))
+        with self.assertRaises(hive.IllegalMovement):
+            board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,1)))
+        with self.assertRaises(hive.IllegalMovement):
+            board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,-1)))
+            
     def test_hex_distance(self):
         self.assertEqual(hive.HiveBoard.hex_distance((0,0), (0,1)), 1)
         self.assertEqual(hive.HiveBoard.hex_distance((0,0), (-1,1)), 1)
