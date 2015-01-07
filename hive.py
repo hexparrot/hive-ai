@@ -50,6 +50,7 @@ class Rule(Enum):
 class HiveBoard(object):
     def __init__(self, tile_orientation=Flat_Directions):
         self._pieces = {}
+        self._log = []
         self.tile_orientation = tile_orientation
 
     def __getitem__(self, key):
@@ -78,6 +79,20 @@ class HiveBoard(object):
         
     def stack_at(self, coords):
         return self._pieces[coords]
+        
+    def perform(self, ply):
+        if ply.rule == Rule.Place:
+            self.place(ply.tile, ply.dest)
+        elif ply.rule == Rule.Move:
+            if ply.tile is None:
+                ply = Ply(ply.rule,
+                          self.piece_at(ply.origin),
+                          ply.origin,
+                          ply.dest)
+            else:
+                self.move(ply.origin, ply.dest)
+
+        self._log.append(ply)
     
     def check(self, ply):
         def queen_placed(color):
