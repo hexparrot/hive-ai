@@ -109,7 +109,7 @@ class HiveBoard(object):
             return False
             
         def invalid_climb():
-            if self.piece_at(ply.dest) and \
+            if ply.dest in self._pieces and \
                 ply.tile.insect != Insect.Beetle:
                 return True
             return False

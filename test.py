@@ -234,7 +234,7 @@ class TestHive(unittest.TestCase):
         
         self.assertEqual(board.ply_number, 1)
     
-    def test_only_beetles_can_climb(self):
+    def test_beetle_movement(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
         
         t = hive.Tile(hive.Color.White, hive.Insect.Queen)
@@ -251,10 +251,13 @@ class TestHive(unittest.TestCase):
 
         p5 = hive.Ply(hive.Rule.Move, None, (0,-1), (0,0))
         p6 = hive.Ply(hive.Rule.Move, None, (0,2), (0,1))
+        p7 = hive.Ply(hive.Rule.Move, None, (0,0), (1,-1))
         
         board.perform(p5)
         with self.assertRaises(hive.IllegalMovement):
             board.perform(p6)
+        
+        board.perform(p7)
             
     def test_single_hex_movement_checked(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
@@ -277,7 +280,7 @@ class TestHive(unittest.TestCase):
             board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,1)))
         with self.assertRaises(hive.IllegalMovement):
             board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,-1)))
-            
+    
     def test_hex_distance(self):
         self.assertEqual(hive.HiveBoard.hex_distance((0,0), (0,1)), 1)
         self.assertEqual(hive.HiveBoard.hex_distance((0,0), (-1,1)), 1)
