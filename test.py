@@ -106,21 +106,39 @@ class TestHive(unittest.TestCase):
         
     def test_rule_movement_before_queen_placed(self):
         board = hive.HiveBoard()
-        
+
         t = hive.Tile(hive.Color.White, hive.Insect.Ant)
         p = hive.Ply(hive.Rule.Place, t, None, (0,0))
-        
         board.perform(p)
         
-        t2 = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        t2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
         p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
-        
         board.perform(p2)
         
-        p3 = hive.Ply(hive.Rule.Move, None, (0,1), (1,0))
+        p3 = hive.Ply(hive.Rule.Move, None, (0,0), (1,0))
         
         with self.assertRaises(hive.IllegalMovement):
             board.perform(p3)
+            
+    def test_rule_adjacency_to_opponent(self):
+        board = hive.HiveBoard()
+        
+        t = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
+        board.perform(p)
+        
+        t2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
+        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
+        board.perform(p2)
+        
+        t3 = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p3_a = hive.Ply(hive.Rule.Place, t3, None, (0,2))
+        
+        with self.assertRaises(hive.IllegalPlacement):
+            board.perform(p3_a)
+            
+        p3_b = hive.Ply(hive.Rule.Place, t3, None, (0,-1))
+        board.perform(p3_b)
         
     def test_hex_neighbors(self):
         board = hive.HiveBoard(hive.Flat_Directions)

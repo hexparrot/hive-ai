@@ -95,7 +95,16 @@ class HiveBoard(object):
             return False
 
         if ply.rule == Rule.Place:
-            self.place(ply.tile, ply.dest)
+            if len(self._log) == 1:
+                if placed_adjacent_to_opponent(ply.tile.color):
+                    self.place(ply.tile, ply.dest)
+                else:
+                    raise IllegalPlacement(ply.tile, ply.dest)
+            else:
+                if placed_adjacent_to_opponent(ply.tile.color):
+                    raise IllegalPlacement(ply.tile, ply.dest)
+                else:
+                    self.place(ply.tile, ply.dest)
         elif ply.rule == Rule.Move:
             if ply.tile is None:
                 ply = Ply(ply.rule,
