@@ -86,29 +86,6 @@ class TestHive(unittest.TestCase):
             
         self.assertEqual(board.piece_at((0,1)).color, hive.Color.White)
         self.assertEqual(board.piece_at((0,1)).insect, hive.Insect.Queen)
-    
-    def test_log(self):
-        board = hive.HiveBoard()
-        piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
-        
-        board.place(piece, (0,0))
-        board.move((0,0), (0,1))
-        
-        self.assertIs(board._log[0].tile, piece)
-        self.assertEqual(board._log[0].origin, None)
-        self.assertEqual(board._log[0].dest, (0,0))
-        
-        self.assertIs(board._log[1].tile, piece)
-        self.assertEqual(board._log[1].origin, (0,0))
-        self.assertEqual(board._log[1].dest, (0,1))
-        
-        with self.assertRaises(KeyError):
-            board.move((0,0), (0,1))
-        
-        board.move((0,1), (1,1))
-        self.assertIs(board._log[2].tile, piece)
-        self.assertEqual(board._log[2].origin, (0,1))
-        self.assertEqual(board._log[2].dest, (1,1))
         
     def test_hex_neighbors(self):
         board = hive.HiveBoard(hive.Flat_Directions)

@@ -50,7 +50,6 @@ class Rule(Enum):
 class HiveBoard(object):
     def __init__(self, tile_orientation=Flat_Directions):
         self._pieces = {}
-        self._log = []
         self.tile_orientation = tile_orientation
 
     def __getitem__(self, key):
@@ -93,20 +92,6 @@ class HiveBoard(object):
                     if self.piece_at(c).color != color:
                         return True
             return False
-        
-        if ply.tile and not ply.origin and ply.dest: 
-            #if introducting a new tile to the game
-            if len(self._log) == 0:
-                return True
-            elif len(self._log) == 1 and \
-                placed_adjacent_to_opponent(ply.tile.color):
-                return True
-            else:
-                if not placed_adjacent_to_opponent(ply.tile.color):
-                    return True
-        else: #if a movement instead
-            if queen_placed(ply.tile.color):
-                return True
     
     @staticmethod
     def hex_neighbors(tile_orientation, origin):
