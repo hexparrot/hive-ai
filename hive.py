@@ -56,12 +56,18 @@ class HiveBoard(object):
     def __getitem__(self, key):
         return self._pieces[key]
         
+    def move(self, origin, dest):
+        t = self.pop(origin)
+        if dest in self._pieces:
+            self._pieces[dest].append(t)
+        else:
+            self._pieces[dest] = [t]
+        
     def place(self, tile, coords):
         if coords in self._pieces:
             raise RuntimeError
         self._pieces[coords] = [tile]
-        self._log.append(Ply(Rule.Place, tile, None, coords))
-    
+
     def pop(self, coords):
         p = self._pieces[coords].pop()
         if not self._pieces[coords]:
@@ -73,15 +79,6 @@ class HiveBoard(object):
         
     def stack_at(self, coords):
         return self._pieces[coords]
-        
-    def move(self, origin, dest):
-        t = self.pop(origin)
-        if dest in self._pieces:
-            self._pieces[dest].append(t)
-        else:
-            self._pieces[dest] = [t]
-        
-        self._log.append(Ply(Rule.Move, t, origin, dest))
     
     def check(self, ply):
         def queen_placed(color):
