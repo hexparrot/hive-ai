@@ -118,6 +118,10 @@ class HiveBoard(object):
                 self.hex_distance(ply.origin, ply.dest) != 1:
                 raise IllegalMove('Your {0} must move at least one space'.format(ply.tile.insect))
 
+        def check_insect_moved():
+            if self.hex_distance(ply.origin, ply.dest) == 0:
+                raise IllegalMove('No piece may end where it started its turn')
+
         if ply.rule == Rule.Place:
             check_queen_opening()
             check_queen_down_by_fourth_turn()
@@ -141,6 +145,7 @@ class HiveBoard(object):
             if not queen_placed(ply.tile.color):
                 raise IllegalMove('Queen Bee must be placed before attempting to move other pieces')
             
+            check_insect_moved()
             check_climbing_permitted()
             check_correct_distance_for_single_hex_insects()
 
