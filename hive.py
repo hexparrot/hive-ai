@@ -46,6 +46,17 @@ class Rule(Enum):
     Place = 0
     Move = 1
     External_Move = 2
+    
+class Violation(Enum):
+    Queen_Bee_Opening_Prohibited = 'Current rules disallow Queen Bee opening'
+    Queen_Bee_Must_Be_Played = 'Queen Bee must be placed by turn 4'
+    Queen_Bee_Not_Yet_Played = 'Queen Bee must be placed before attempting to move other pieces'
+    Insect_Cannot_Climb = 'Piece may not climb atop other pieces'
+    Distance_Must_Be_Exactly_One = 'Piece must move exactly one space'
+    Invalid_Distance_Attempted = 'Piece moved an incorrect number of spaces'
+    Did_Not_Move = 'No piece may end where it started its turn'
+    Must_Place_Adjacent = 'First placement must be adjacent to opponent'
+    May_Not_Place_Adjacent = 'Moves after the first may not be adjacent to opponent'
 
 class HiveBoard(object):
     def __init__(self,
@@ -98,41 +109,42 @@ class HiveBoard(object):
             if self.ply_number in [0,1] and \
                 not self.queen_opening_allowed and \
                 ply.tile.insect == Insect.Queen:
-                raise IllegalMove('Current rules disallow Queen Bee opening')
+                raise IllegalMove(Violation.Queen_Bee_Opening_Prohibited)
             
         def check_queen_down_by_fourth_turn():
             if self.ply_number in [6,7] and \
                 not queen_placed(ply.tile.color) and \
                 ply.tile.insect != Insect.Queen:
-                raise IllegalMove('Your Queen Bee must be placed by turn 4')
+                raise IllegalMove(Violation.Queen_Bee_Must_Be_Played)
             
         def check_climbing_permitted():
             if ply.dest in self._pieces and \
                 ply.tile.insect != Insect.Beetle:
-                raise IllegalMove('Your {0} may not climb atop other pieces'.format(ply.tile.insect))
+                raise IllegalMove(Violation.Insect_Cannot_Climb)
         
         def check_correct_distance_for_single_hex_insects():
             if ply.tile.insect in [Insect.Queen,
                                    Insect.Beetle,
                                    Insect.Pillbug] and \
                 self.hex_distance(ply.origin, ply.dest) != 1:
-                raise IllegalMove('Your {0} must move at least one space'.format(ply.tile.insect))
+                raise IllegalMove(Violation.Distance_Must_Be_Exactly_One)
 
         def check_insect_moved():
             if self.hex_distance(ply.origin, ply.dest) == 0:
-                raise IllegalMove('No piece may end where it started its turn')
+                raise IllegalMove(Violation.Did_Not_Move)
 
         if ply.rule == Rule.Place:
             check_queen_opening()
             check_queen_down_by_fourth_turn()
+            
             if self.ply_number == 1:
                 if placed_adjacent_to_opponent(ply.tile.color):
                     self.place(ply.tile, ply.dest)
                 else:
-                    raise IllegalMove('First placement must be adjacent to opponent')
+                    raise IllegalMove(Violation.Must_Place_Adjacent)
             else:
                 if placed_adjacent_to_opponent(ply.tile.color):
-                    raise IllegalMove('Moves after the first may not be adjacent to opponent')
+                    raise IllegalMove(Violation.May_Not_Place_Adjacent)
                 else:
                     self.place(ply.tile, ply.dest)
         elif ply.rule == Rule.Move:
@@ -143,7 +155,7 @@ class HiveBoard(object):
                           ply.dest)
                           
             if not queen_placed(ply.tile.color):
-                raise IllegalMove('Queen Bee must be placed before attempting to move other pieces')
+                raise IllegalMove(Violation.Queen_Bee_Must_Be_Played)
             
             check_insect_moved()
             check_climbing_permitted()
@@ -169,5 +181,6 @@ class HiveBoard(object):
                 abs(origin[0] + origin[1] - dest[0] - dest[1])) / 2
 
 class IllegalMove(Exception):
-    def __init__(self, message):
-        self.message = message
+    def __init__(self, violation):
+        self.violation = violation
+        self.message = violation.value
