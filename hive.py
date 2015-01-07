@@ -50,7 +50,7 @@ class Rule(Enum):
 class Violation(Enum):
     Queen_Bee_Opening_Prohibited = 'Current rules disallow Queen Bee opening'
     Queen_Bee_Must_Be_Played = 'Queen Bee must be placed by turn 4'
-    Queen_Bee_Not_Yet_Played = 'Queen Bee must be placed before attempting to move other pieces'
+    No_Movement_Before_Queen_Bee_Placed = 'Queen Bee must be placed before attempting to move other pieces'
     Insect_Cannot_Climb = 'Piece may not climb atop other pieces'
     Distance_Must_Be_Exactly_One = 'Piece must move exactly one space'
     Invalid_Distance_Attempted = 'Piece moved an incorrect number of spaces'
@@ -155,7 +155,7 @@ class HiveBoard(object):
                           ply.dest)
                           
             if not queen_placed(ply.tile.color):
-                raise IllegalMove(Violation.Queen_Bee_Must_Be_Played)
+                raise IllegalMove(Violation.No_Movement_Before_Queen_Bee_Placed)
             
             check_insect_moved()
             check_climbing_permitted()

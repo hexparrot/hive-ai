@@ -118,8 +118,10 @@ class TestHive(unittest.TestCase):
         
         p3 = hive.Ply(hive.Rule.Move, None, (0,0), (1,0))
         
-        with self.assertRaises(hive.IllegalMove):
+        with self.assertRaises(hive.IllegalMove) as e:
             board.perform(p3)
+        
+        self.assertEqual(e.exception.violation, hive.Violation.No_Movement_Before_Queen_Bee_Placed)
             
     def test_rule_adjacency_to_opponent(self):
         board = hive.HiveBoard()
@@ -135,8 +137,10 @@ class TestHive(unittest.TestCase):
         t3 = hive.Tile(hive.Color.White, hive.Insect.Ant)
         p3_a = hive.Ply(hive.Rule.Place, t3, None, (0,2))
         
-        with self.assertRaises(hive.IllegalMove):
+        with self.assertRaises(hive.IllegalMove) as e:
             board.perform(p3_a)
+        
+        self.assertEqual(e.exception.violation, hive.Violation.May_Not_Place_Adjacent)
             
         p3_b = hive.Ply(hive.Rule.Place, t3, None, (0,-1))
         board.perform(p3_b)
@@ -180,13 +184,17 @@ class TestHive(unittest.TestCase):
         board.perform(p4)
         board.perform(p5)
         board.perform(p6)
-        with self.assertRaises(hive.IllegalMove):
+        with self.assertRaises(hive.IllegalMove) as e:
             board.perform(p7_a)
+        
+        self.assertEqual(e.exception.violation, hive.Violation.Queen_Bee_Must_Be_Played)
         
         board.perform(p7_b)
         
-        with self.assertRaises(hive.IllegalMove):
+        with self.assertRaises(hive.IllegalMove) as e:
             board.perform(p8_a)
+        
+        self.assertEqual(e.exception.violation, hive.Violation.Queen_Bee_Must_Be_Played)
         
         board.perform(p8_b)
         
@@ -208,8 +216,10 @@ class TestHive(unittest.TestCase):
         t2_a = hive.Tile(hive.Color.Black, hive.Insect.Queen)
         p2_a = hive.Ply(hive.Rule.Place, t2_a, None, (0,1))
         
-        with self.assertRaises(hive.IllegalMove):
+        with self.assertRaises(hive.IllegalMove) as e:
             board.perform(p2_a)
+        
+        self.assertEqual(e.exception.violation, hive.Violation.Queen_Bee_Opening_Prohibited)
     
     def test_special_rules_queen_opening_permitted(self):
         '''tourney rules about queen not available on move 1'''
@@ -254,8 +264,10 @@ class TestHive(unittest.TestCase):
         p7 = hive.Ply(hive.Rule.Move, None, (0,0), (1,-1))
         
         board.perform(p5)
-        with self.assertRaises(hive.IllegalMove):
+        with self.assertRaises(hive.IllegalMove) as e:
             board.perform(p6)
+        
+        self.assertEqual(e.exception.violation, hive.Violation.Insect_Cannot_Climb)
         
         board.perform(p7)
             
@@ -274,12 +286,17 @@ class TestHive(unittest.TestCase):
         for e in [p, p2, p3, p4]:
             board.perform(e)
         
-        with self.assertRaises(hive.IllegalMove):
+        with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,2)))
-        with self.assertRaises(hive.IllegalMove):
+        self.assertEqual(e.exception.violation, hive.Violation.Distance_Must_Be_Exactly_One)
+        
+        with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,1)))
-        with self.assertRaises(hive.IllegalMove):
+        self.assertEqual(e.exception.violation, hive.Violation.Distance_Must_Be_Exactly_One)
+            
+        with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,-1)))
+        self.assertEqual(e.exception.violation, hive.Violation.Did_Not_Move)
     
     def test_insect_did_move(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
@@ -296,8 +313,9 @@ class TestHive(unittest.TestCase):
         for e in [p, p2, p3, p4]:
             board.perform(e)
             
-        with self.assertRaises(hive.IllegalMove):
+        with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,-1)))
+        self.assertEqual(e.exception.violation, hive.Violation.Did_Not_Move)
     
     def test_hex_distance(self):
         self.assertEqual(hive.HiveBoard.hex_distance((0,0), (0,1)), 1)
