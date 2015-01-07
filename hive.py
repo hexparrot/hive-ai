@@ -103,6 +103,13 @@ class HiveBoard(object):
                 ply.tile.insect == Insect.Queen:
                 return False
             return True
+            
+        def fourth_move_okay():
+            if len(self._log) in [6,7] and \
+                not queen_placed(ply.tile.color) and \
+                ply.tile.insect != Insect.Queen:
+                return False
+            return True
 
         if ply.rule == Rule.Place:
             if not opening_okay():
@@ -112,10 +119,8 @@ class HiveBoard(object):
                     self.place(ply.tile, ply.dest)
                 else:
                     raise IllegalPlacement(ply.tile, ply.dest)
-            elif len(self._log) in [6,7] and \
-                not queen_placed(ply.tile.color) and \
-                ply.tile.insect != Insect.Queen:
-                    raise IllegalPlacement(ply.tile, ply.dest) 
+            elif not fourth_move_okay():
+                raise IllegalPlacement(ply.tile, ply.dest) 
             else:
                 if placed_adjacent_to_opponent(ply.tile.color):
                     raise IllegalPlacement(ply.tile, ply.dest)
