@@ -118,7 +118,7 @@ class TestHive(unittest.TestCase):
         
         p3 = hive.Ply(hive.Rule.Move, None, (0,0), (1,0))
         
-        with self.assertRaises(hive.IllegalMovement):
+        with self.assertRaises(hive.IllegalMove):
             board.perform(p3)
             
     def test_rule_adjacency_to_opponent(self):
@@ -135,7 +135,7 @@ class TestHive(unittest.TestCase):
         t3 = hive.Tile(hive.Color.White, hive.Insect.Ant)
         p3_a = hive.Ply(hive.Rule.Place, t3, None, (0,2))
         
-        with self.assertRaises(hive.IllegalPlacement):
+        with self.assertRaises(hive.IllegalMove):
             board.perform(p3_a)
             
         p3_b = hive.Ply(hive.Rule.Place, t3, None, (0,-1))
@@ -180,12 +180,12 @@ class TestHive(unittest.TestCase):
         board.perform(p4)
         board.perform(p5)
         board.perform(p6)
-        with self.assertRaises(hive.IllegalPlacement):
+        with self.assertRaises(hive.IllegalMove):
             board.perform(p7_a)
         
         board.perform(p7_b)
         
-        with self.assertRaises(hive.IllegalPlacement):
+        with self.assertRaises(hive.IllegalMove):
             board.perform(p8_a)
         
         board.perform(p8_b)
@@ -197,7 +197,7 @@ class TestHive(unittest.TestCase):
         t1_a = hive.Tile(hive.Color.White, hive.Insect.Queen)
         p1_a = hive.Ply(hive.Rule.Place, t1_a, None, (0,0))
         
-        with self.assertRaises(hive.IllegalPlacement):
+        with self.assertRaises(hive.IllegalMove):
             board.perform(p1_a)
             
         t1_z = hive.Tile(hive.Color.White, hive.Insect.Ant)
@@ -208,7 +208,7 @@ class TestHive(unittest.TestCase):
         t2_a = hive.Tile(hive.Color.Black, hive.Insect.Queen)
         p2_a = hive.Ply(hive.Rule.Place, t2_a, None, (0,1))
         
-        with self.assertRaises(hive.IllegalPlacement):
+        with self.assertRaises(hive.IllegalMove):
             board.perform(p2_a)
     
     def test_special_rules_queen_opening_permitted(self):
@@ -254,7 +254,7 @@ class TestHive(unittest.TestCase):
         p7 = hive.Ply(hive.Rule.Move, None, (0,0), (1,-1))
         
         board.perform(p5)
-        with self.assertRaises(hive.IllegalMovement):
+        with self.assertRaises(hive.IllegalMove):
             board.perform(p6)
         
         board.perform(p7)
@@ -274,11 +274,11 @@ class TestHive(unittest.TestCase):
         for e in [p, p2, p3, p4]:
             board.perform(e)
         
-        with self.assertRaises(hive.IllegalMovement):
+        with self.assertRaises(hive.IllegalMove):
             board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,2)))
-        with self.assertRaises(hive.IllegalMovement):
+        with self.assertRaises(hive.IllegalMove):
             board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,1)))
-        with self.assertRaises(hive.IllegalMovement):
+        with self.assertRaises(hive.IllegalMove):
             board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,-1)))
     
     def test_hex_distance(self):

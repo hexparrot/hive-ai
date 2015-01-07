@@ -94,47 +94,41 @@ class HiveBoard(object):
                         return True
             return False
             
-        def opening_invalid():
+        def check_queen_opening():
             if self.ply_number in [0,1] and \
                 not self.queen_opening_allowed and \
                 ply.tile.insect == Insect.Queen:
-                return True
-            return False
+                raise IllegalMove('Current rules disallow Queen Bee opening')
             
-        def fourth_move_invalid():
+        def check_queen_down_by_fourth_turn():
             if self.ply_number in [6,7] and \
                 not queen_placed(ply.tile.color) and \
                 ply.tile.insect != Insect.Queen:
-                return True
-            return False
+                raise IllegalMove('Your Queen Bee must be placed by turn 4')
             
-        def invalid_climb():
+        def check_climbing_permitted():
             if ply.dest in self._pieces and \
                 ply.tile.insect != Insect.Beetle:
-                return True
-            return False
+                raise IllegalMove('Your {0} may not climb atop other pieces'.format(ply.tile.insect))
         
-        def single_hex_movement_violated():
+        def check_correct_distance_for_single_hex_insects():
             if ply.tile.insect in [Insect.Queen,
                                    Insect.Beetle,
                                    Insect.Pillbug] and \
                 self.hex_distance(ply.origin, ply.dest) != 1:
-                return True
-            return False
+                raise IllegalMove('Your {0} must move at least one space'.format(ply.tile.insect))
 
         if ply.rule == Rule.Place:
-            if opening_invalid():
-                raise IllegalPlacement(ply.tile, ply.dest)
-            elif self.ply_number == 1:
+            check_queen_opening()
+            check_queen_down_by_fourth_turn()
+            if self.ply_number == 1:
                 if placed_adjacent_to_opponent(ply.tile.color):
                     self.place(ply.tile, ply.dest)
                 else:
-                    raise IllegalPlacement(ply.tile, ply.dest)
-            elif fourth_move_invalid():
-                raise IllegalPlacement(ply.tile, ply.dest) 
+                    raise IllegalMove('First placement must be adjacent to opponent')
             else:
                 if placed_adjacent_to_opponent(ply.tile.color):
-                    raise IllegalPlacement(ply.tile, ply.dest)
+                    raise IllegalMove('Moves after the first may not be adjacent to opponent')
                 else:
                     self.place(ply.tile, ply.dest)
         elif ply.rule == Rule.Move:
@@ -145,19 +139,12 @@ class HiveBoard(object):
                           ply.dest)
                           
             if not queen_placed(ply.tile.color):
-                raise IllegalMovement(ply.tile,
-                                      ply.origin,
-                                      ply.dest)
-            elif invalid_climb():
-                raise IllegalMovement(ply.tile,
-                                      ply.origin,
-                                      ply.dest)
-            elif single_hex_movement_violated():
-                raise IllegalMovement(ply.tile,
-                                      ply.origin,
-                                      ply.dest)
-            else:
-                self.move(ply.origin, ply.dest)
+                raise IllegalMove('Queen Bee must be placed before attempting to move other pieces')
+            
+            check_climbing_permitted()
+            check_correct_distance_for_single_hex_insects()
+
+            self.move(ply.origin, ply.dest)
 
         self._log.append(ply)
         
@@ -176,17 +163,6 @@ class HiveBoard(object):
         return (abs(origin[0] - dest[0]) + abs(origin[1] - dest[1]) + \
                 abs(origin[0] + origin[1] - dest[0] - dest[1])) / 2
 
-class IllegalMovement(Exception):
-    def __init__(self, actor, origin, dest):
-        self.actor = actor
-        self.origin = origin
-        self.dest = dest
-        
-        self.message = 'Cannot move any pieces until Queen has been placed'
-
-class IllegalPlacement(Exception):
-    def __init__(self, actor, dest):
-        self.actor = actor
-        self.dest = dest
-        
-        self.message = 'Cannot place {0} at {1}'.format(actor, dest)
+class IllegalMove(Exception):
+    def __init__(self, message):
+        self.message = message
