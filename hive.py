@@ -107,6 +107,12 @@ class HiveBoard(object):
                 ply.tile.insect != Insect.Queen:
                 return False
             return True
+            
+        def invalid_climb():
+            if self.piece_at(ply.dest) and \
+                ply.tile.insect != Insect.Beetle:
+                return True
+            return False
 
         if ply.rule == Rule.Place:
             if not opening_okay():
@@ -131,6 +137,10 @@ class HiveBoard(object):
                           ply.dest)
                           
             if not queen_placed(ply.tile.color):
+                raise IllegalMovement(ply.tile,
+                                      ply.origin,
+                                      ply.dest)
+            elif invalid_climb():
                 raise IllegalMovement(ply.tile,
                                       ply.origin,
                                       ply.dest)
