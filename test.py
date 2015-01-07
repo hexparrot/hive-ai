@@ -223,6 +223,18 @@ class TestHive(unittest.TestCase):
         p2_a = hive.Ply(hive.Rule.Place, t2_a, None, (0,1))
         board.perform(p2_a)
         
+    def test_ply_number_property(self):
+        board = hive.HiveBoard()
+        
+        self.assertEqual(board.ply_number, 0)
+        
+        t = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
+        board.perform(p)
+        
+        self.assertEqual(board.ply_number, 1)
+        
+        
     def test_hex_neighbors(self):
         board = hive.HiveBoard(hive.Flat_Directions)
         self.assertSetEqual(board.hex_neighbors(board.tile_orientation, (0,0)),
