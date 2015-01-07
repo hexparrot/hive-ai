@@ -144,8 +144,8 @@ class HiveBoard(object):
                 raise IllegalMovement(ply.tile,
                                       ply.origin,
                                       ply.dest)
-
-            self.move(ply.origin, ply.dest)
+            else:
+                self.move(ply.origin, ply.dest)
 
         self._log.append(ply)
         
