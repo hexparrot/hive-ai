@@ -190,8 +190,8 @@ class TestHive(unittest.TestCase):
         
         board.perform(p8_b)
         
-    def test_special_rules(self):
-        '''includes tourney rules about queen not available on move 1'''
+    def test_special_rules_queen_opening_prohibited(self):
+        '''tourney rules about queen not available on move 1'''
         board = hive.HiveBoard(queen_opening_allowed=False)
         
         t1_a = hive.Tile(hive.Color.White, hive.Insect.Queen)
@@ -210,6 +210,18 @@ class TestHive(unittest.TestCase):
         
         with self.assertRaises(hive.IllegalPlacement):
             board.perform(p2_a)
+    
+    def test_special_rules_queen_opening_permitted(self):
+        '''tourney rules about queen not available on move 1'''
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        
+        t1_a = hive.Tile(hive.Color.White, hive.Insect.Queen)
+        p1_a = hive.Ply(hive.Rule.Place, t1_a, None, (0,0))
+        board.perform(p1_a)
+        
+        t2_a = hive.Tile(hive.Color.Black, hive.Insect.Queen)
+        p2_a = hive.Ply(hive.Rule.Place, t2_a, None, (0,1))
+        board.perform(p2_a)
         
     def test_hex_neighbors(self):
         board = hive.HiveBoard(hive.Flat_Directions)
