@@ -177,9 +177,9 @@ class HiveBoard(object):
         self._log.append(ply)
         
     def valid_moves(self, coords):
-        def adjacent_to_something(origin, dest):
+        def adjacent_to_something(ignored_origin, dest):
             for c in self.hex_neighbors(self.tile_orientation, dest):
-                if c in self._pieces and c != origin:
+                if c in self._pieces and c != ignored_origin:
                     return True
                         
         def queen_bee():
@@ -212,11 +212,37 @@ class HiveBoard(object):
             for i in valid:
                 yield i
         
+        def spider():
+            checked = set()
+            s1 = set() #1 tile out
+            s2 = set() #2 tiles out
+            s3 = set() #3 tiles out
+
+            for c in self.hex_neighbors(self.tile_orientation, coords):
+                if c not in self._pieces and adjacent_to_something(coords, c):
+                    s1.add(c)
+                    checked.add(c)
+
+            for i in s1:
+                for c in self.hex_neighbors(self.tile_orientation, i):
+                    if c not in self._pieces and adjacent_to_something(coords, c) and c not in checked:
+                        s2.add(c)
+                        checked.add(c)
+            
+            for i in s2:
+                for c in self.hex_neighbors(self.tile_orientation, i):
+                    if c not in self._pieces and adjacent_to_something(coords, c) and c not in checked:
+                        s3.add(c)
+
+            for i in s3:
+                yield i
+        
         return {
             Insect.Queen: queen_bee,
             Insect.Beetle: beetle,
             Insect.Grasshopper: grasshopper,
-            Insect.Ant: ant
+            Insect.Ant: ant,
+            Insect.Spider: spider
             }[self.piece_at(coords).insect]()
 
     @property
