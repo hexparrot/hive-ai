@@ -202,10 +202,21 @@ class HiveBoard(object):
                         c = self.go_direction(c, direction)
                     yield c
         
+        def ant():
+            valid = set()
+
+            for p in [k for k in self._pieces.keys() if k != coords]:
+                valid.update(self.hex_neighbors(self.tile_orientation, p))
+
+            valid.difference_update([k for k in self._pieces.keys()])
+            for i in valid:
+                yield i
+        
         return {
             Insect.Queen: queen_bee,
             Insect.Beetle: beetle,
-            Insect.Grasshopper: grasshopper
+            Insect.Grasshopper: grasshopper,
+            Insect.Ant: ant
             }[self.piece_at(coords).insect]()
 
     @property
