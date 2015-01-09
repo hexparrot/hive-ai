@@ -66,6 +66,15 @@ class HiveBoard(object):
         self._log = []
         self.tile_orientation = tile_orientation
         self.queen_opening_allowed = queen_opening_allowed
+
+    def __str__(self):
+        import hexgrid
+        
+        hg = hexgrid.HexGrid()
+        for coords, stack in self._pieces.items():
+            hg.annotate(coords, stack[-1].color.value + stack[-1].insect.value)
+
+        return '\n'.join(i for i in hg.grid)
         
     def move(self, origin, dest):
         t = self.pop(origin)
@@ -164,14 +173,6 @@ class HiveBoard(object):
             self.move(ply.origin, ply.dest)
 
         self._log.append(ply)
-
-    def display(self):
-        import hexgrid
-        
-        hg = hexgrid.HexGrid()
-        for coords, stack in self._pieces.items():
-            hg.annotate(coords, stack[-1].color.value + stack[-1].insect.value)
-        hg.display()
 
     @property
     def ply_number(self):
