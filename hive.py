@@ -175,15 +175,87 @@ class HiveBoard(object):
             self.move(ply.origin, ply.dest)
 
         self._log.append(ply)
+        
+    def valid_moves(self, coords):
+        def adjacent_to_something(ignored_origin, dest):
+            for c in self.hex_neighbors(self.tile_orientation, dest):
+                if c in self._pieces and c != ignored_origin:
+                    return True
+                        
+        def queen_bee():
+            for direction in self.tile_orientation:
+                c = self.go_direction(coords, direction)
+                if c not in self._pieces and adjacent_to_something(coords, c):
+                    yield c
+        
+        def beetle():
+            for direction in self.tile_orientation:
+                c = self.go_direction(coords, direction)
+                if adjacent_to_something(coords, c):
+                    yield c
+                    
+        def grasshopper():
+            for direction in self.tile_orientation:
+                c = self.go_direction(coords, direction)
+                if c in self._pieces:
+                    while c in self._pieces:
+                        c = self.go_direction(c, direction)
+                    yield c
+        
+        def ant():
+            valid = set()
+
+            for p in [k for k in self._pieces.keys() if k != coords]:
+                valid.update(self.hex_neighbors(self.tile_orientation, p))
+
+            valid.difference_update([k for k in self._pieces.keys()])
+            for i in valid:
+                yield i
+        
+        def spider():
+            checked = set()
+            s1 = set() #1 tile out
+            s2 = set() #2 tiles out
+            s3 = set() #3 tiles out
+
+            for c in self.hex_neighbors(self.tile_orientation, coords):
+                if c not in self._pieces and adjacent_to_something(coords, c):
+                    s1.add(c)
+                    checked.add(c)
+
+            for i in s1:
+                for c in self.hex_neighbors(self.tile_orientation, i):
+                    if c not in self._pieces and adjacent_to_something(coords, c) and c not in checked:
+                        s2.add(c)
+                        checked.add(c)
+            
+            for i in s2:
+                for c in self.hex_neighbors(self.tile_orientation, i):
+                    if c not in self._pieces and adjacent_to_something(coords, c) and c not in checked:
+                        s3.add(c)
+
+            for i in s3:
+                yield i
+        
+        return {
+            Insect.Queen: queen_bee,
+            Insect.Beetle: beetle,
+            Insect.Grasshopper: grasshopper,
+            Insect.Ant: ant,
+            Insect.Spider: spider
+            }[self.piece_at(coords).insect]()
 
     @property
     def ply_number(self):
         return len(self._log)
-
+        
     @staticmethod
-    def hex_neighbors(tile_orientation, origin):
-        return set([tuple(sum(x) for x in zip(origin, d.value))
-                    for d in tile_orientation])
+    def go_direction(coord, direction):
+        return tuple(map(sum, zip(coord, direction.value)))
+
+    @classmethod
+    def hex_neighbors(cls, tile_orientation, origin):
+        return set(cls.go_direction(origin, d) for d in tile_orientation)
                         
     @staticmethod
     def hex_distance(origin, dest):
