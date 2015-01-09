@@ -195,7 +195,12 @@ class HiveBoard(object):
                     yield c
                     
         def grasshopper():
-            pass
+            for direction in self.tile_orientation:
+                c = self.go_direction(coords, direction)
+                if c in self._pieces:
+                    while c in self._pieces:
+                        c = self.go_direction(c, direction)
+                    yield c
         
         return {
             Insect.Queen: queen_bee,

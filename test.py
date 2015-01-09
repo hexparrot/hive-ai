@@ -369,7 +369,7 @@ class TestHive(unittest.TestCase):
         board.perform(hive.Ply(hive.Rule.Move, None, (-1,0), (1,0)))
         
         self.assertSetEqual(set(board.valid_moves( (1,0) )),
-                            set([(-1,2)]))
+                            set([(-1,0), (-1,2)]))
         
     def test_hex_distance(self):
         self.assertEqual(hive.HiveBoard.hex_distance((0,0), (0,1)), 1)
