@@ -193,20 +193,27 @@ class HiveBoard(object):
                 c = (coords[0] + direction.value[0], coords[1] + direction.value[1])
                 if adjacent_to_something(coords, c):
                     yield c
+                    
+        def grasshopper():
+            pass
         
         return {
             Insect.Queen: queen_bee,
-            Insect.Beetle: beetle
+            Insect.Beetle: beetle,
+            Insect.Grasshopper: grasshopper
             }[self.piece_at(coords).insect]()
 
     @property
     def ply_number(self):
         return len(self._log)
-
+        
     @staticmethod
-    def hex_neighbors(tile_orientation, origin):
-        return set([tuple(sum(x) for x in zip(origin, d.value))
-                    for d in tile_orientation])
+    def go_direction(coord, direction):
+        return tuple(map(sum, zip(coord, direction.value)))
+
+    @classmethod
+    def hex_neighbors(cls, tile_orientation, origin):
+        return set(cls.go_direction(origin, d) for d in tile_orientation)
                         
     @staticmethod
     def hex_distance(origin, dest):
