@@ -74,7 +74,7 @@ class HiveBoard(object):
         for coords, stack in self._pieces.items():
             hg.annotate(coords, stack[-1].color.value + stack[-1].insect.value)
 
-        return '\n'.join(i for i in hg.grid)
+        return str(hg)
         
     def move(self, origin, dest):
         t = self.pop(origin)

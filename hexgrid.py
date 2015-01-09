@@ -42,19 +42,18 @@ class HexGrid(object):
     def __init__(self):
         import textwrap
         self.grid = textwrap.wrap(self.STATIC_GRID, 70)
+        
+    def __str__(self):
+        return '\n'.join(i for i in self.grid)
 
-    def annotate(self, coords, top):
+    def annotate(self, coords, note):
         list_row = self.CENTER_ROW + (coords[1] * 2)
         if coords[0] % 2:
             list_row -= 1
         col_row = self.CENTER_COL + (coords[0] * 3)
         self.grid[list_row] = self.grid[list_row][0:col_row-1] \
-                                     + top \
+                                     + note \
                                      + self.grid[list_row][col_row + 1:]
-    
-    def display(self):
-        for i in self.grid:
-            print(i)
         
 if __name__ == '__main__':
     example = HexGrid()
