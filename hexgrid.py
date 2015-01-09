@@ -39,9 +39,10 @@ class HexGrid(object):
 \__/  \__/  \__/  \__/  \__/  \__/  \__/  \__/  \__/  \__/  \__/  \__/
     '''
 
-    def __init__(self):
+    def __init__(self, reduced=False):
         import textwrap
         self.grid = textwrap.wrap(self.STATIC_GRID, 70)
+        self._show_reduced = reduced
         self.bounds = {
             'left': 0,
             'top': 0,
@@ -50,7 +51,10 @@ class HexGrid(object):
         }
         
     def __str__(self):
-        return '\n'.join(i for i in self.grid)
+        if self._show_reduced:
+            return self.reduced
+        else:
+            return '\n'.join(i for i in self.grid)
 
     def annotate(self, coords, note):
         self.bounds['left'] = min([coords[0], self.bounds['left']])
