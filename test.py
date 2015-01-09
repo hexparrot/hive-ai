@@ -316,6 +316,25 @@ class TestHive(unittest.TestCase):
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,-1)))
         self.assertEqual(e.exception.violation, hive.Violation.Did_Not_Move)
+
+    def test_queen_movement(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
+        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
+        t2 = hive.Tile(hive.Color.Black, hive.Insect.Queen)
+        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
+        
+        for e in [p, p2]:
+            board.perform(e)
+
+        self.assertSetEqual(set(board.valid_moves( (0,0) )),
+                            set([(-1,1), (-1,0), (0,-1), (1,-1), (1,0)]))
+                                 
+        board.perform(hive.Ply(hive.Rule.Move, None, (0,0), (-1,1)))
+        
+        self.assertSetEqual(set(board.valid_moves( (0,1) )),
+                            set([(0,0), (1,0), (1,1), 
+                                 (0,2), (-1,2)]))
     
     def test_hex_distance(self):
         self.assertEqual(hive.HiveBoard.hex_distance((0,0), (0,1)), 1)

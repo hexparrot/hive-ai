@@ -175,6 +175,12 @@ class HiveBoard(object):
             self.move(ply.origin, ply.dest)
 
         self._log.append(ply)
+        
+    def valid_moves(self, coords):
+        for direction in self.tile_orientation:
+            c = (coords[0] + direction.value[0], coords[1] + direction.value[1])
+            if c not in self._pieces:
+                yield c
 
     @property
     def ply_number(self):
