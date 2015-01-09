@@ -13,18 +13,18 @@ Tile = namedtuple('Tile', 'color insect')
 Ply = namedtuple('Ply', 'rule tile origin dest')
 
 class Insect(Enum):
-    Queen = 0
-    Ant = 1
-    Beetle = 2
-    Grasshopper = 3
-    Spider = 4
-    Mosquito = 5
-    Ladybug = 6
-    Pillbug = 7
+    Queen = 'Q'
+    Ant = 'A'
+    Beetle = 'B'
+    Grasshopper = 'G'
+    Spider = 'S'
+    Mosquito = 'M'
+    Ladybug = 'L'
+    Pillbug = 'P'
     
 class Color(Enum):
-    White = 0
-    Black = 1
+    White = 'w'
+    Black = 'b'
     
 class Pointed_Directions(Enum):
     NE = (1,-1)
@@ -66,6 +66,15 @@ class HiveBoard(object):
         self._log = []
         self.tile_orientation = tile_orientation
         self.queen_opening_allowed = queen_opening_allowed
+
+    def __str__(self):
+        import hexgrid
+        
+        hg = hexgrid.HexGrid()
+        for coords, stack in self._pieces.items():
+            hg.annotate(coords, stack[-1].color.value + stack[-1].insect.value)
+
+        return str(hg)
         
     def move(self, origin, dest):
         t = self.pop(origin)
@@ -164,7 +173,7 @@ class HiveBoard(object):
             self.move(ply.origin, ply.dest)
 
         self._log.append(ply)
-        
+
     @property
     def ply_number(self):
         return len(self._log)
