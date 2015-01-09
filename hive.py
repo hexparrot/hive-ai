@@ -177,10 +177,27 @@ class HiveBoard(object):
         self._log.append(ply)
         
     def valid_moves(self, coords):
-        for direction in self.tile_orientation:
-            c = (coords[0] + direction.value[0], coords[1] + direction.value[1])
-            if c not in self._pieces:
-                yield c
+        def adjacent_to_something(origin, dest):
+            for c in self.hex_neighbors(self.tile_orientation, dest):
+                if c in self._pieces and c != origin:
+                    return True
+                        
+        def queen_bee():
+            for direction in self.tile_orientation:
+                c = (coords[0] + direction.value[0], coords[1] + direction.value[1])
+                if c not in self._pieces and adjacent_to_something(coords, c):
+                    yield c
+        
+        def beetle():
+            for direction in self.tile_orientation:
+                c = (coords[0] + direction.value[0], coords[1] + direction.value[1])
+                if adjacent_to_something(coords, c):
+                    yield c
+        
+        return {
+            Insect.Queen: queen_bee,
+            Insect.Beetle: beetle
+            }[self.piece_at(coords).insect]()
 
     @property
     def ply_number(self):
