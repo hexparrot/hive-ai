@@ -184,13 +184,13 @@ class HiveBoard(object):
                         
         def queen_bee():
             for direction in self.tile_orientation:
-                c = (coords[0] + direction.value[0], coords[1] + direction.value[1])
+                c = self.go_direction(coords, direction)
                 if c not in self._pieces and adjacent_to_something(coords, c):
                     yield c
         
         def beetle():
             for direction in self.tile_orientation:
-                c = (coords[0] + direction.value[0], coords[1] + direction.value[1])
+                c = self.go_direction(coords, direction)
                 if adjacent_to_something(coords, c):
                     yield c
                     
