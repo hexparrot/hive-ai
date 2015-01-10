@@ -70,22 +70,6 @@ class HexGrid(object):
         self.grid[list_row] = self.grid[list_row][0:col_row-1] \
                                      + note \
                                      + self.grid[list_row][col_row + 1:]
-                 
-    @property
-    def reduced(self):
-        upper_bound_row = self.CENTER_ROW + (self.bounds['top'] * 2) - 3
-        lower_bound_row = self.CENTER_ROW + (self.bounds['bottom'] * 2) + 4
-        
-        left_bound_col = self.CENTER_COL + (self.bounds['left'] * 3) - 2
-        right_bound_col = self.CENTER_COL + (self.bounds['right'] * 3) + 2
-        
-        temp = []
-        
-        for i, v in enumerate(self.grid):
-            if lower_bound_row > i > upper_bound_row:
-                temp.append(v[left_bound_col:right_bound_col])
-        
-        return '\n'.join(i for i in temp)
         
 if __name__ == '__main__':
     example = HexGrid()
@@ -104,4 +88,3 @@ if __name__ == '__main__':
     example.annotate( (2,1), 'bG' )
     
     print(example)
-    print(example.reduced)

@@ -61,18 +61,16 @@ class Violation(Enum):
 class HiveBoard(object):
     def __init__(self,
                  tile_orientation=Flat_Directions,
-                 queen_opening_allowed=False,
-                 show_reduced_grid=True):
+                 queen_opening_allowed=False):
         self._pieces = {}
         self._log = []
         self.tile_orientation = tile_orientation
         self.queen_opening_allowed = queen_opening_allowed
-        self.show_reduced_grid = show_reduced_grid
 
     def __str__(self):
         import hexgrid
         
-        hg = hexgrid.HexGrid(reduced=self.show_reduced_grid)
+        hg = hexgrid.HexGrid()
         for coords, stack in self._pieces.items():
             hg.annotate(coords, stack[-1].color.value + stack[-1].insect.value)
 
