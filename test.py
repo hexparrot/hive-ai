@@ -38,24 +38,6 @@ class TestHive(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             board.place(t2, (0,0))
-            
-    def test_pop(self):
-        board = hive.HiveBoard()
-        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
-        
-        with self.assertRaises(KeyError):
-            board.pop((0,0))
-        
-        board.place(t, (0,0))
-        p = board.pop((0,0))
-        
-        self.assertIs(t, p)
-        
-        with self.assertRaises(KeyError):
-            board.piece_at((0,0))
-
-        with self.assertRaises(KeyError):
-            board.pop((0,0))
 
     def test_piece_at(self):
         board = hive.HiveBoard()

@@ -77,7 +77,10 @@ class HiveBoard(object):
         return str(hg)
         
     def move(self, origin, dest):
-        t = self.pop(origin)
+        t = self._pieces[origin].pop()
+        if not self._pieces[origin]:
+            del self._pieces[origin]
+
         if dest in self._pieces:
             self._pieces[dest].append(t)
         else:
@@ -87,12 +90,6 @@ class HiveBoard(object):
         if coords in self._pieces:
             raise RuntimeError
         self._pieces[coords] = [tile]
-
-    def pop(self, coords):
-        p = self._pieces[coords].pop()
-        if not self._pieces[coords]:
-            del self._pieces[coords]
-        return p
         
     def piece_at(self, coords):
         return self._pieces[coords][-1]
