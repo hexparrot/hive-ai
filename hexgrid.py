@@ -64,8 +64,6 @@ class HexGrid(object):
         self.bounds['bottom'] = max([coords[1], self.bounds['bottom']])
         
         list_row = self.CENTER_ROW + (coords[1] * 2) + (coords[0])
-        #if coords[0] % 2:
-        #    list_row -= 1
         col_row = self.CENTER_COL + (coords[0] * 3)
         self.grid[list_row] = self.grid[list_row][0:col_row-1] \
                                      + note \
@@ -73,18 +71,20 @@ class HexGrid(object):
         
 if __name__ == '__main__':
     example = HexGrid()
-    example.annotate( (-4,0), 'wA' )
-    example.annotate( (-3,0), 'wA' )
-    example.annotate( (-2,0), 'wA' )
-    example.annotate( (-1,0), 'wG' )
+    example.annotate( (-4,0), 'wB' )
+    example.annotate( (-3,0), 'wB' )
+    example.annotate( (-2,0), 'wS' )
+    example.annotate( (-1,0), 'wS' )
     example.annotate( (0,0), 'wQ' )
-    example.annotate( (1,0), 'wB' )
-    example.annotate( (2,0), 'wG' )
+    example.annotate( (1,0), 'wA' )
+    example.annotate( (2,0), 'wA' )
     
-    example.annotate( (-2,1), 'bS' )
-    example.annotate( (-1,1), 'bA' )
-    example.annotate( (0,1), 'bQ' )
-    example.annotate( (1,1), 'bB' )
-    example.annotate( (2,1), 'bG' )
+    example.annotate( (-2,1), 'bB' )
+    example.annotate( (-1,1), 'bB' )
+    example.annotate( (0,1), 'bS' )
+    example.annotate( (1,1), 'bS' )
+    example.annotate( (2,1), 'bQ' )
+    example.annotate( (3,1), 'bA' )
+    example.annotate( (4,1), 'bA' )
     
     print(example)
