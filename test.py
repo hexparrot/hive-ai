@@ -401,6 +401,16 @@ class TestHive(unittest.TestCase):
                          [(0,-1), (-1,0), (-1,1), (-1,2)])
         self.assertEqual(board.valid_path((0,-1), (1,1)),
                          [(0,-1), (1,-1), (1,0), (1,1)])
+        
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Beetle), (0,2))
+        #testing beetle
+        self.assertEqual(board.valid_path((0,2), (-1,2)),
+                         [(0,2), (-1,2)])
+        self.assertEqual(board.valid_path((0,2), (1,1)),
+                         [(0,2), (1,1)])
+        self.assertEqual(board.valid_path((0,2), (0,1)),
+                         [(0,2), (0,1)])
+
 
     def test_hex_distance(self):
         self.assertEqual(hive.HiveBoard.hex_distance((0,0), (0,1)), 1)

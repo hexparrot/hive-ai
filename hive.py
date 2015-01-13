@@ -254,15 +254,22 @@ class HiveBoard(object):
         limit = 250
         counter = 0
         
+        insect = self.piece_at(origin).insect
+        
         while not frontier.empty():
             counter += 1
             if counter > limit: break
             current = frontier.get()
             for n in self.hex_neighbors(self.tile_orientation, current):
-                if n not in came_from and \
-                    not n in self._pieces:
-                    frontier.put(n)
-                    came_from[n] = current
+                if n not in came_from:
+                    if insect == Insect.Spider:                        
+                        if n not in self._pieces:
+                            frontier.put(n)
+                            came_from[n] = current
+                    elif insect == Insect.Beetle:
+                        frontier.put(n)
+                        came_from[n] = current
+
 
         current = dest
         path = [current]
