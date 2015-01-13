@@ -376,6 +376,19 @@ class TestHive(unittest.TestCase):
                          [(1,1), (0,1), (-1,1)])
         self.assertEqual(board.valid_path((1,1), (-1,3)),
                          [(1,1), (0,2), (-1,3)])
+
+    def test_freedom_of_movement(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Spider), (1,-1))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Spider), (1,1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Ant), (2,-1))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Ant), (0,2))
+        
+        with self.assertRaises(hive.IllegalMove) as e:
+            board.perform(hive.Ply(hive.Rule.Move, None, (0,2), (1,0)))
+        self.assertEqual(e.exception.violation, hive.Violation.Freedom_of_Movement)
                          
     def test_get_direction(self):
         self.assertEqual(hive.HiveBoard.get_direction((0,0), (-1,0), hive.Flat_Directions), hive.Flat_Directions.NW)

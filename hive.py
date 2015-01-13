@@ -57,6 +57,7 @@ class Violation(Enum):
     Did_Not_Move = 'No piece may end where it started its turn'
     Must_Place_Adjacent = 'First placement must be adjacent to opponent'
     May_Not_Place_Adjacent = 'Moves after the first may not be adjacent to opponent'
+    Freedom_of_Movement = 'Piece unable to slide physically through this path'
 
 class HiveBoard(object):
     def __init__(self,
@@ -138,6 +139,39 @@ class HiveBoard(object):
         def check_insect_moved():
             if self.hex_distance(ply.origin, ply.dest) == 0:
                 raise IllegalMove(Violation.Did_Not_Move)
+                
+        def freedom_of_movement(path):
+            Flat_Blocking = {
+                Flat_Directions.N: (Flat_Directions.NW, Flat_Directions.NE),
+                Flat_Directions.NE: (Flat_Directions.N, Flat_Directions.SE),
+                Flat_Directions.SE: (Flat_Directions.NE, Flat_Directions.S),
+                Flat_Directions.S: (Flat_Directions.SW, Flat_Directions.SE),
+                Flat_Directions.SW: (Flat_Directions.NW, Flat_Directions.S),
+                Flat_Directions.NW: (Flat_Directions.SW, Flat_Directions.N)
+            }
+            
+            Pointed_Blocking = {
+                Pointed_Directions.NE: (Pointed_Directions.NW, Pointed_Directions.E),
+                Pointed_Directions.E: (Pointed_Directions.NE, Pointed_Directions.SE),
+                Pointed_Directions.SE: (Pointed_Directions.E, Pointed_Directions.SW),
+                Pointed_Directions.SW: (Pointed_Directions.W, Pointed_Directions.SE),
+                Pointed_Directions.W: (Pointed_Directions.NW, Pointed_Directions.SW),
+                Pointed_Directions.NW: (Pointed_Directions.NE, Pointed_Directions.W)
+            }
+            
+            path_copy = path[:]
+            blockers = Flat_Blocking if self.tile_orientation == Flat_Directions else Pointed_Blocking
+            
+            while path_copy:
+                try:
+                    current = path_copy.pop(0)
+                    direction = self.get_direction(current, path_copy[0], self.tile_orientation)
+                    
+                    if self.go_direction(current, blockers[direction][0]) in self._pieces and \
+                        self.go_direction(current, blockers[direction][1]) in self._pieces:
+                        raise IllegalMove(Violation.Freedom_of_Movement)
+                except IndexError:
+                    break
 
         if ply.rule == Rule.Place:
             check_queen_opening()
@@ -166,6 +200,7 @@ class HiveBoard(object):
             check_insect_moved()
             check_climbing_permitted()
             check_correct_distance_for_single_hex_insects()
+            freedom_of_movement(self.valid_path(ply.origin, ply.dest))
 
             self.move(ply.origin, ply.dest)
 
