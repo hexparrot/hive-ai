@@ -141,6 +141,9 @@ class HiveBoard(object):
                 raise IllegalMove(Violation.Did_Not_Move)
                 
         def freedom_of_movement(path):
+            if self.piece_at(path[0]).insect in [Insect.Grasshopper, Insect.Beetle]:
+                return
+            
             Flat_Blocking = {
                 Flat_Directions.N: (Flat_Directions.NW, Flat_Directions.NE),
                 Flat_Directions.NE: (Flat_Directions.N, Flat_Directions.SE),
