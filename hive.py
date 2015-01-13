@@ -241,8 +241,20 @@ class HiveBoard(object):
             }[self.piece_at(coords).insect]()
 
     def valid_path(self, origin, dest):
-        #thanks amit patel
-        #http://www.redblobgames.com/pathfinding/a-star/introduction.html
+        '''this function will find a valid path for the tiles from A->B.
+        However, it makes limited assumptions about the piece it is moving.
+        For example, the spider movement heuristic is the same as the ant's,
+        but the spider can only move 3 tiles--this movement restriction
+        is not part of hb.valid_path. This function should operate as if
+        the tile itself has unlimited moves (and thus it can create a beetle
+        path that extends long beyond one tile).
+        
+        thanks amit patel
+        http://www.redblobgames.com/pathfinding/a-star/introduction.html
+        
+        FIXME: remove arbitrary limit to space discovery. likely replace
+        by detecting further point+1 and having that be the hard boundary
+        '''
         from queue import Queue
         
         frontier = Queue()
@@ -262,21 +274,13 @@ class HiveBoard(object):
             current = frontier.get()
             for n in self.hex_neighbors(self.tile_orientation, current):
                 if n not in came_from:
-                    if insect == Insect.Spider:                        
+                    if insect in [Insect.Spider, Insect.Ant, Insect.Queen]:                        
                         if n not in self._pieces:
                             frontier.put(n)
                             came_from[n] = current
                     elif insect == Insect.Beetle:
                         frontier.put(n)
                         came_from[n] = current
-                    elif insect == Insect.Queen:
-                        if n not in self._pieces:
-                            frontier.put(n)
-                            came_from[n] = current
-                    elif insect == Insect.Ant:                        
-                        if n not in self._pieces:
-                            frontier.put(n)
-                            came_from[n] = current
                     elif insect == Insect.Grasshopper:
                         if n in self._pieces and n!= dest:
                             frontier.put(n)
