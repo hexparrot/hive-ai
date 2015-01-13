@@ -269,7 +269,14 @@ class HiveBoard(object):
                     elif insect == Insect.Beetle:
                         frontier.put(n)
                         came_from[n] = current
-
+                    elif insect == Insect.Queen:
+                        if n not in self._pieces:
+                            frontier.put(n)
+                            came_from[n] = current
+                    elif insect == Insect.Ant:                        
+                        if n not in self._pieces:
+                            frontier.put(n)
+                            came_from[n] = current
 
         current = dest
         path = [current]
