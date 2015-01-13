@@ -389,7 +389,19 @@ class TestHive(unittest.TestCase):
         
         self.assertSetEqual(set(board.valid_moves( (-1,0) )),
                             set([(-1,3), (1,0)]))
-        
+                            
+    def test_valid_path(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Spider), (0,-1))
+
+        #testing spider
+        self.assertEqual(board.valid_path((0,-1), (-1,2)),
+                         [(0,-1), (-1,0), (-1,1), (-1,2)])
+        self.assertEqual(board.valid_path((0,-1), (1,1)),
+                         [(0,-1), (1,-1), (1,0), (1,1)])
+
     def test_hex_distance(self):
         self.assertEqual(hive.HiveBoard.hex_distance((0,0), (0,1)), 1)
         self.assertEqual(hive.HiveBoard.hex_distance((0,0), (-1,1)), 1)

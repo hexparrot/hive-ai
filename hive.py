@@ -240,6 +240,37 @@ class HiveBoard(object):
             Insect.Spider: spider
             }[self.piece_at(coords).insect]()
 
+    def valid_path(self, origin, dest):
+        #thanks amit patel
+        #http://www.redblobgames.com/pathfinding/a-star/introduction.html
+        from queue import Queue
+        
+        frontier = Queue()
+        frontier.put(origin)
+        
+        came_from = {}
+        came_from[origin] = None
+        
+        limit = 250
+        counter = 0
+        
+        while not frontier.empty():
+            counter += 1
+            if counter > limit: break
+            current = frontier.get()
+            for n in self.hex_neighbors(self.tile_orientation, current):
+                if n not in came_from and \
+                    not n in self._pieces:
+                    frontier.put(n)
+                    came_from[n] = current
+
+        current = dest
+        path = [current]
+        while current != origin:
+            current = came_from[current]
+            path.append(current)
+        return list(reversed(path))
+
     @property
     def ply_number(self):
         return len(self._log)
