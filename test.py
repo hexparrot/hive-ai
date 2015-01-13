@@ -160,12 +160,9 @@ class TestHive(unittest.TestCase):
         t8_b = hive.Tile(hive.Color.Black, hive.Insect.Queen)
         p8_b = hive.Ply(hive.Rule.Place, t8_b, None, (0,4))
         
-        board.perform(p1)
-        board.perform(p2)
-        board.perform(p3)
-        board.perform(p4)
-        board.perform(p5)
-        board.perform(p6)
+        for e in [p1, p2, p3, p4, p5, p6]:
+            board.perform(e)
+
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(p7_a)
         
@@ -229,17 +226,10 @@ class TestHive(unittest.TestCase):
     def test_beetle_movement(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
         
-        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
-        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
-        t2 = hive.Tile(hive.Color.Black, hive.Insect.Queen)
-        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
-        t3 = hive.Tile(hive.Color.White, hive.Insect.Beetle)
-        p3 = hive.Ply(hive.Rule.Place, t3, None, (0,-1))
-        t4 = hive.Tile(hive.Color.Black, hive.Insect.Spider)
-        p4 = hive.Ply(hive.Rule.Place, t4, None, (0,2))
-        
-        for e in [p, p2, p3, p4]:
-            board.perform(e)
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Beetle), (0,-1))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Spider), (0,2))
 
         p5 = hive.Ply(hive.Rule.Move, None, (0,-1), (0,0))
         p6 = hive.Ply(hive.Rule.Move, None, (0,2), (0,1))
@@ -256,17 +246,10 @@ class TestHive(unittest.TestCase):
     def test_single_hex_movement_checked(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
         
-        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
-        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
-        t2 = hive.Tile(hive.Color.Black, hive.Insect.Queen)
-        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
-        t3 = hive.Tile(hive.Color.White, hive.Insect.Beetle)
-        p3 = hive.Ply(hive.Rule.Place, t3, None, (0,-1))
-        t4 = hive.Tile(hive.Color.Black, hive.Insect.Spider)
-        p4 = hive.Ply(hive.Rule.Place, t4, None, (0,2))
-        
-        for e in [p, p2, p3, p4]:
-            board.perform(e)
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Beetle), (0,-1))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Spider), (0,2))
         
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,2)))
@@ -283,31 +266,20 @@ class TestHive(unittest.TestCase):
     def test_insect_did_move(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
         
-        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
-        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
-        t2 = hive.Tile(hive.Color.Black, hive.Insect.Queen)
-        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
-        t3 = hive.Tile(hive.Color.White, hive.Insect.Ant)
-        p3 = hive.Ply(hive.Rule.Place, t3, None, (0,-1))
-        t4 = hive.Tile(hive.Color.Black, hive.Insect.Spider)
-        p4 = hive.Ply(hive.Rule.Place, t4, None, (0,2))
-        
-        for e in [p, p2, p3, p4]:
-            board.perform(e)
-            
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Beetle), (0,-1))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Spider), (0,2))
+
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,-1)))
         self.assertEqual(e.exception.violation, hive.Violation.Did_Not_Move)
 
     def test_queen_valid_moves(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
-        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
-        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
-        t2 = hive.Tile(hive.Color.Black, hive.Insect.Queen)
-        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
-        
-        for e in [p, p2]:
-            board.perform(e)
+
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
 
         self.assertSetEqual(set(board.valid_moves( (0,0) )),
                             set([(-1,1), (1,0)]))
@@ -315,35 +287,21 @@ class TestHive(unittest.TestCase):
     def test_beetle_valid_moves(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
         
-        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
-        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
-        t2 = hive.Tile(hive.Color.Black, hive.Insect.Queen)
-        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
-        t3 = hive.Tile(hive.Color.White, hive.Insect.Beetle)
-        p3 = hive.Ply(hive.Rule.Place, t3, None, (-1,0))
-        t4 = hive.Tile(hive.Color.Black, hive.Insect.Beetle)
-        p4 = hive.Ply(hive.Rule.Place, t4, None, (0,2))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Beetle), (-1,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Beetle), (0,2))
         
-        for e in [p, p2, p3, p4]:
-            board.perform(e)
-            
         self.assertSetEqual(set(board.valid_moves( (-1,0) )),
                             set([(0,-1), (0,0), (-1,1)]))
                             
     def test_grasshopper_valid_moves(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
         
-        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
-        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
-        t2 = hive.Tile(hive.Color.Black, hive.Insect.Queen)
-        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
-        t3 = hive.Tile(hive.Color.White, hive.Insect.Grasshopper)
-        p3 = hive.Ply(hive.Rule.Place, t3, None, (-1,0))
-        t4 = hive.Tile(hive.Color.Black, hive.Insect.Grasshopper)
-        p4 = hive.Ply(hive.Rule.Place, t4, None, (0,2))
-        
-        for e in [p, p2, p3, p4]:
-            board.perform(e)
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Grasshopper), (-1,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Grasshopper), (0,2))
             
         self.assertSetEqual(set(board.valid_moves( (-1,0) )),
                             set([(1,0)]))
@@ -356,17 +314,10 @@ class TestHive(unittest.TestCase):
     def test_ant_valid_moves(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
         
-        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
-        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
-        t2 = hive.Tile(hive.Color.Black, hive.Insect.Queen)
-        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
-        t3 = hive.Tile(hive.Color.White, hive.Insect.Ant)
-        p3 = hive.Ply(hive.Rule.Place, t3, None, (-1,0))
-        t4 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
-        p4 = hive.Ply(hive.Rule.Place, t4, None, (0,2))
-        
-        for e in [p, p2, p3, p4]:
-            board.perform(e)
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Ant), (-1,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Ant), (0,2))
             
         self.assertSetEqual(set(board.valid_moves( (-1,0) )),
                             set([(0,-1), (1,-1), (1,0), (1,1),
@@ -375,17 +326,10 @@ class TestHive(unittest.TestCase):
     def test_spider_valid_moves(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
         
-        t = hive.Tile(hive.Color.White, hive.Insect.Queen)
-        p = hive.Ply(hive.Rule.Place, t, None, (0,0))
-        t2 = hive.Tile(hive.Color.Black, hive.Insect.Queen)
-        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
-        t3 = hive.Tile(hive.Color.White, hive.Insect.Spider)
-        p3 = hive.Ply(hive.Rule.Place, t3, None, (-1,0))
-        t4 = hive.Tile(hive.Color.Black, hive.Insect.Spider)
-        p4 = hive.Ply(hive.Rule.Place, t4, None, (0,2))
-        
-        for e in [p, p2, p3, p4]:
-            board.perform(e)
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Spider), (-1,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Spider), (0,2))
         
         self.assertSetEqual(set(board.valid_moves( (-1,0) )),
                             set([(-1,3), (1,0)]))
