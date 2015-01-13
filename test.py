@@ -376,6 +376,15 @@ class TestHive(unittest.TestCase):
                          [(1,1), (0,1), (-1,1)])
         self.assertEqual(board.valid_path((1,1), (-1,3)),
                          [(1,1), (0,2), (-1,3)])
+                         
+    def test_get_direction(self):
+        self.assertEqual(hive.HiveBoard.get_direction((0,0), (-1,0), hive.Flat_Directions), hive.Flat_Directions.NW)
+        self.assertEqual(hive.HiveBoard.get_direction((0,0), (1,-1), hive.Flat_Directions), hive.Flat_Directions.NE)
+        
+        with self.assertRaises(RuntimeError):
+            hive.HiveBoard.get_direction((0,0), (-3,0), hive.Flat_Directions)
+        with self.assertRaises(RuntimeError):
+            hive.HiveBoard.get_direction((0,0), (1,-3), hive.Flat_Directions)
 
     def test_hex_distance(self):
         self.assertEqual(hive.HiveBoard.hex_distance((0,0), (0,1)), 1)

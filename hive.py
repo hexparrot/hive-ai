@@ -299,7 +299,16 @@ class HiveBoard(object):
     @property
     def ply_number(self):
         return len(self._log)
-        
+    
+    @staticmethod
+    def get_direction(origin, dest, tile_orientation):
+        delta = (dest[0] - origin[0], dest[1] - origin[1])
+        for d in tile_orientation:
+            if d.value == delta:
+                return d
+        else:
+            raise RuntimeError
+    
     @staticmethod
     def go_direction(coord, direction):
         return tuple(map(sum, zip(coord, direction.value)))
