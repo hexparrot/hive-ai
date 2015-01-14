@@ -9,8 +9,26 @@ __email__ = "wdchromium@gmail.com"
 from enum import Enum
 from collections import namedtuple
 
-Tile = namedtuple('Tile', 'color insect')
 Ply = namedtuple('Ply', 'rule tile origin dest')
+
+class Tile(object):
+    def __init__(self, color, insect):
+        self._color = color
+        self._insect = insect
+        
+    def __eq__(self, other):
+        return self.color == other.color and self.insect == other.insect
+    
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    
+    @property
+    def color(self):
+        return self._color
+        
+    @property
+    def insect(self):
+        return self._insect
 
 class Insect(Enum):
     Queen = 'Q'
@@ -100,8 +118,9 @@ class HiveBoard(object):
         
     def perform(self, ply):    
         def queen_placed(color):
+            q = Tile(color, Insect.Queen)
             for stack in self._pieces.values():
-                if Tile(color, Insect.Queen) in stack:
+                if q in stack:
                     return True
             return False
             

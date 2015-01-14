@@ -25,6 +25,11 @@ class TestHive(unittest.TestCase):
         self.assertEqual(piece.color, hive.Color.White)
         self.assertEqual(piece.insect, hive.Insect.Queen)
         
+        self.assertEqual(piece, piece)
+        
+        piece2 = hive.Tile(hive.Color.Black, hive.Insect.Queen)
+        self.assertNotEqual(piece, piece2)
+        
     def test_place(self):
         board = hive.HiveBoard()
         
