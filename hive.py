@@ -116,7 +116,25 @@ class HiveBoard(object):
     def stack_at(self, coords):
         return self._pieces[coords]
         
-    def perform(self, ply):    
+    def perform(self, ply):  
+        Flat_Blocking = {
+            Flat_Directions.N: (Flat_Directions.NW, Flat_Directions.NE),
+            Flat_Directions.NE: (Flat_Directions.N, Flat_Directions.SE),
+            Flat_Directions.SE: (Flat_Directions.NE, Flat_Directions.S),
+            Flat_Directions.S: (Flat_Directions.SW, Flat_Directions.SE),
+            Flat_Directions.SW: (Flat_Directions.NW, Flat_Directions.S),
+            Flat_Directions.NW: (Flat_Directions.SW, Flat_Directions.N)
+        }
+        
+        Pointed_Blocking = {
+            Pointed_Directions.NE: (Pointed_Directions.NW, Pointed_Directions.E),
+            Pointed_Directions.E: (Pointed_Directions.NE, Pointed_Directions.SE),
+            Pointed_Directions.SE: (Pointed_Directions.E, Pointed_Directions.SW),
+            Pointed_Directions.SW: (Pointed_Directions.W, Pointed_Directions.SE),
+            Pointed_Directions.W: (Pointed_Directions.NW, Pointed_Directions.SW),
+            Pointed_Directions.NW: (Pointed_Directions.NE, Pointed_Directions.W)
+        }
+        
         def queen_placed(color):
             q = Tile(color, Insect.Queen)
             for stack in self._pieces.values():
@@ -162,25 +180,7 @@ class HiveBoard(object):
         def freedom_of_movement(path):
             if self.piece_at(path[0]).insect in [Insect.Grasshopper, Insect.Beetle]:
                 return
-            
-            Flat_Blocking = {
-                Flat_Directions.N: (Flat_Directions.NW, Flat_Directions.NE),
-                Flat_Directions.NE: (Flat_Directions.N, Flat_Directions.SE),
-                Flat_Directions.SE: (Flat_Directions.NE, Flat_Directions.S),
-                Flat_Directions.S: (Flat_Directions.SW, Flat_Directions.SE),
-                Flat_Directions.SW: (Flat_Directions.NW, Flat_Directions.S),
-                Flat_Directions.NW: (Flat_Directions.SW, Flat_Directions.N)
-            }
-            
-            Pointed_Blocking = {
-                Pointed_Directions.NE: (Pointed_Directions.NW, Pointed_Directions.E),
-                Pointed_Directions.E: (Pointed_Directions.NE, Pointed_Directions.SE),
-                Pointed_Directions.SE: (Pointed_Directions.E, Pointed_Directions.SW),
-                Pointed_Directions.SW: (Pointed_Directions.W, Pointed_Directions.SE),
-                Pointed_Directions.W: (Pointed_Directions.NW, Pointed_Directions.SW),
-                Pointed_Directions.NW: (Pointed_Directions.NE, Pointed_Directions.W)
-            }
-            
+
             path_copy = path[:]
             blockers = Flat_Blocking if self.tile_orientation == Flat_Directions else Pointed_Blocking
             
@@ -194,6 +194,26 @@ class HiveBoard(object):
                         raise IllegalMove(Violation.Freedom_of_Movement)
                 except IndexError:
                     break
+        
+        def beetle_gate_freedom_of_moment(start, end):
+            '''per rule: http://boardgamegeek.com/wiki/page/Hive_FAQ#toc9'''
+            def height_of(cc):
+                try:
+                    return len(self.stack_at(cc))
+                except KeyError:
+                    return 0
+            
+            if self.piece_at(start).insect != Insect.Beetle:
+                return
+                
+            blockers = Flat_Blocking if self.tile_orientation == Flat_Directions else Pointed_Blocking
+            direction = self.get_direction(start, end, self.tile_orientation)
+            
+            gate_1 = self.go_direction(start, blockers[direction][0])
+            gate_2 = self.go_direction(start, blockers[direction][1])
+
+            if min(height_of(gate_1), height_of(gate_2)) > max(height_of(start)-1, height_of(end)):
+                raise IllegalMove(Violation.Freedom_of_Movement)
 
         if ply.rule == Rule.Place:
             check_queen_opening()
@@ -222,7 +242,9 @@ class HiveBoard(object):
             check_insect_moved()
             check_climbing_permitted()
             check_correct_distance_for_single_hex_insects()
+            
             freedom_of_movement(self.valid_path(ply.origin, ply.dest))
+            beetle_gate_freedom_of_moment(ply.origin, ply.dest)
 
             self.move(ply.origin, ply.dest)
 

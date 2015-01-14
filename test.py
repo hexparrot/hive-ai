@@ -399,9 +399,23 @@ class TestHive(unittest.TestCase):
         board.place(hive.Tile(hive.Color.White, hive.Insect.Grasshopper), (-1,2))
         board.perform(hive.Ply(hive.Rule.Move, None, (-1,2), (1,0)))
         board.perform(hive.Ply(hive.Rule.Move, None, (1,0), (-1,2)))
-        
-        #test beetle
+
+    def test_beetle_gate_restriction(self):
+        #http://www.boardgamegeek.com/thread/332467/how-are-beetles-affected-sliding-rule-when-crawlin
+    
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Spider), (1,-1))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Spider), (1,1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Ant), (2,-1))
         board.place(hive.Tile(hive.Color.Black, hive.Insect.Beetle), (2,0))
+        
+        with self.assertRaises(hive.IllegalMove) as e:
+            board.perform(hive.Ply(hive.Rule.Move, None, (2,0), (1,0)))
+        self.assertEqual(e.exception.violation, hive.Violation.Freedom_of_Movement)
+        
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Ant), (1,0))
         board.perform(hive.Ply(hive.Rule.Move, None, (2,0), (1,0)))
                          
     def test_get_direction(self):
