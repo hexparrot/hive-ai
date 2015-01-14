@@ -415,6 +415,24 @@ class TestHive(unittest.TestCase):
         self.assertEqual(hive.HiveBoard.hex_distance((0,0), (5,-5)), 5)
         self.assertEqual(hive.HiveBoard.hex_distance((0,0), (2,-3)), 3)
     
+    def test_radius(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        self.assertEqual(board.radius, 0)
+        
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        self.assertEqual(board.radius, 1)
+        
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Spider), (0,-1))
+        self.assertEqual(board.radius, 1)
+        
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Spider), (0,2))
+        self.assertEqual(board.radius, 2)
+
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Spider), (1,0))
+        self.assertEqual(board.radius, 2)
+
     def test_go_direction(self):
         board = hive.HiveBoard(hive.Flat_Directions)
         self.assertEqual(board.go_direction((0,0), hive.Flat_Directions.N), (0,-1))

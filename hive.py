@@ -289,9 +289,6 @@ class HiveBoard(object):
         
         thanks amit patel
         http://www.redblobgames.com/pathfinding/a-star/introduction.html
-        
-        FIXME: remove arbitrary limit to space discovery. likely replace
-        by detecting further point+1 and having that be the hard boundary
         '''
         from queue import Queue
         
@@ -301,7 +298,10 @@ class HiveBoard(object):
         came_from = {}
         came_from[origin] = None
         
-        limit = 250
+        limit = ((self.radius + 1)*2) * 6
+        #includes radius, plus one padding for the boundaries
+        #multiplies by two, for the diameter
+        #multiplied by six, for how many new hexagons introduced per radius
         counter = 0
         
         insect = self.piece_at(origin).insect
@@ -360,6 +360,16 @@ class HiveBoard(object):
         #http://www.redblobgames.com/grids/hexagons/#distances
         return (abs(origin[0] - dest[0]) + abs(origin[1] - dest[1]) + \
                 abs(origin[0] + origin[1] - dest[0] - dest[1])) / 2
+    
+    @property
+    def radius(self):
+        maximum = 0
+        
+        for k in self._pieces:
+            maximum = max(self.hex_distance((0,0), k), maximum)
+        
+        return maximum
+            
 
 class IllegalMove(Exception):
     def __init__(self, violation):
