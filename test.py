@@ -394,11 +394,6 @@ class TestHive(unittest.TestCase):
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Ply(hive.Rule.Move, None, (0,2), (1,0)))
         self.assertEqual(e.exception.violation, hive.Violation.Freedom_of_Movement)
-        
-        #test grasshopper
-        board.place(hive.Tile(hive.Color.White, hive.Insect.Grasshopper), (-1,2))
-        board.perform(hive.Ply(hive.Rule.Move, None, (-1,2), (1,0)))
-        board.perform(hive.Ply(hive.Rule.Move, None, (1,0), (-1,2)))
 
     def test_beetle_gate_restriction(self):
         #http://www.boardgamegeek.com/thread/332467/how-are-beetles-affected-sliding-rule-when-crawlin
