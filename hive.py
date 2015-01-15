@@ -220,7 +220,9 @@ class HiveBoard(object):
             check_queen_opening()
             check_queen_down_by_fourth_turn()
             
-            if self.ply_number == 1:
+            if self.ply_number == 0:
+                self.place(ply.tile, ply.dest)
+            elif self.ply_number == 1:
                 if placed_adjacent_to_opponent(ply.tile.color):
                     self.place(ply.tile, ply.dest)
                 else:
@@ -228,6 +230,8 @@ class HiveBoard(object):
             else:
                 if placed_adjacent_to_opponent(ply.tile.color):
                     raise IllegalMove(Violation.May_Not_Place_Adjacent)
+                elif not any(c in self._pieces for c in self.hex_neighbors(self.tile_orientation, ply.dest)):
+                    raise IllegalMove(Violation.Must_Place_Adjacent)
                 else:
                     self.place(ply.tile, ply.dest)
         elif ply.rule == Rule.Move:

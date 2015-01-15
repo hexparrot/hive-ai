@@ -413,7 +413,7 @@ class TestHive(unittest.TestCase):
         board.place(hive.Tile(hive.Color.Black, hive.Insect.Ant), (1,0))
         board.perform(hive.Ply(hive.Rule.Move, None, (2,0), (1,0)))
     
-    def test_one_hive_rule(self):
+    def test_one_hive_rule_move(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
         board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
         board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
@@ -430,6 +430,25 @@ class TestHive(unittest.TestCase):
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Ply(hive.Rule.Move, None, (1,-1), (2,-2)))
         self.assertEqual(e.exception.violation, hive.Violation.One_Hive_Rule)
+        
+    def test_one_hive_rule_place(self):
+        board = hive.HiveBoard()
+        
+        t1 = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p1 = hive.Ply(hive.Rule.Place, t1, None, (0,0))
+
+        t2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
+        p2 = hive.Ply(hive.Rule.Place, t2, None, (0,1))
+
+        t3 = hive.Tile(hive.Color.White, hive.Insect.Ant)
+        p3 = hive.Ply(hive.Rule.Place, t3, None, (4,4))
+        
+        board.perform(p1)
+        board.perform(p2)
+        with self.assertRaises(hive.IllegalMove) as e:
+            board.perform(p3)
+            
+        self.assertEqual(e.exception.violation, hive.Violation.Must_Place_Adjacent)
                          
     def test_get_direction(self):
         self.assertEqual(hive.HiveBoard.get_direction((0,0), (-1,0), hive.Flat_Directions), hive.Flat_Directions.NW)
