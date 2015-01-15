@@ -76,7 +76,7 @@ class Violation(Enum):
     Must_Place_Adjacent = 'First placement must be adjacent to opponent'
     May_Not_Place_Adjacent = 'Moves after the first may not be adjacent to opponent'
     Freedom_of_Movement = 'Piece unable to slide physically through this path'
-    One_Hive_Rule = 'Movement may not split hive into separate pieces, even in-transit'
+    One_Hive_Rule = 'Movement/placement may not split hive into separate pieces, even in-transit'
 
 class HiveBoard(object):
     def __init__(self,
@@ -231,7 +231,7 @@ class HiveBoard(object):
                 if placed_adjacent_to_opponent(ply.tile.color):
                     raise IllegalMove(Violation.May_Not_Place_Adjacent)
                 elif not any(c in self._pieces for c in self.hex_neighbors(self.tile_orientation, ply.dest)):
-                    raise IllegalMove(Violation.Must_Place_Adjacent)
+                    raise IllegalMove(Violation.One_Hive_Rule)
                 else:
                     self.place(ply.tile, ply.dest)
         elif ply.rule == Rule.Move:

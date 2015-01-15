@@ -448,7 +448,7 @@ class TestHive(unittest.TestCase):
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(p3)
             
-        self.assertEqual(e.exception.violation, hive.Violation.Must_Place_Adjacent)
+        self.assertEqual(e.exception.violation, hive.Violation.One_Hive_Rule)
                          
     def test_get_direction(self):
         self.assertEqual(hive.HiveBoard.get_direction((0,0), (-1,0), hive.Flat_Directions), hive.Flat_Directions.NW)
