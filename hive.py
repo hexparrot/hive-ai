@@ -76,6 +76,7 @@ class Violation(Enum):
     Must_Place_Adjacent = 'First placement must be adjacent to opponent'
     May_Not_Place_Adjacent = 'Moves after the first may not be adjacent to opponent'
     Freedom_of_Movement = 'Piece unable to slide physically through this path'
+    One_Hive_Rule = 'Movement may not split hive into separate pieces, even in-transit'
 
 class HiveBoard(object):
     def __init__(self,
@@ -246,6 +247,8 @@ class HiveBoard(object):
             freedom_of_movement(self.valid_path(ply.origin, ply.dest))
             beetle_gate_freedom_of_moment(ply.origin, ply.dest)
 
+            if not self.one_hive_rule(ply.origin):
+                raise IllegalMove(Violation.One_Hive_Rule)
             self.move(ply.origin, ply.dest)
 
         self._log.append(ply)
@@ -379,6 +382,29 @@ class HiveBoard(object):
             current = came_from[current]
             path.append(current)
         return list(reversed(path))
+
+    def one_hive_rule(self, ignored_coord=None):
+        from queue import Queue
+        
+        frontier = Queue()
+        checked = set()
+        
+        all_pieces = list(self._pieces.keys())
+        
+        if ignored_coord and len(self.stack_at(ignored_coord)) == 1:
+            all_pieces.remove(ignored_coord)
+        
+        start = all_pieces[0]
+        frontier.put(start)
+        
+        while not frontier.empty():
+            current = frontier.get()
+            for n in self.hex_neighbors(self.tile_orientation, current):
+                if n in all_pieces and n not in checked:
+                    frontier.put(n)
+                    checked.add(n)
+
+        return checked == set(all_pieces)
 
     @property
     def ply_number(self):
