@@ -63,7 +63,7 @@ class Flat_Directions(Enum):
 class Rule(Enum):
     Place = 0
     Move = 1
-    External_Move = 2
+    Relocate = 2
     
 class Violation(Enum):
     Queen_Bee_Opening_Prohibited = 'Current rules disallow Queen Bee opening'
@@ -77,6 +77,8 @@ class Violation(Enum):
     May_Not_Place_Adjacent = 'Moves after the first may not be adjacent to opponent'
     Freedom_of_Movement = 'Piece unable to slide physically through this path'
     One_Hive_Rule = 'Movement/placement may not split hive into separate pieces, even in-transit'
+    Pillbug_Adjacent = 'Origin and dest must both be adjacent to pillbug'
+    Pillbug_Cannot_Touch_Stacks = 'Pillbugs may not grab from or place onto stacks'
 
 class HiveBoard(object):
     def __init__(self,
@@ -215,8 +217,18 @@ class HiveBoard(object):
 
             if min(height_of(gate_1), height_of(gate_2)) > max(height_of(start)-1, height_of(end)):
                 raise IllegalMove(Violation.Freedom_of_Movement)
+        
+        def check_origin_dest_empty_adjacency(pillbug_coords):
+            neighbors = self.hex_neighbors(self.tile_orientation, pillbug_coords)
+            if ply.origin not in neighbors or \
+                ply.dest not in neighbors:
+                raise IllegalMove(Violation.Pillbug_Adjacent)
+            elif ply.dest in self._pieces:
+                raise IllegalMove(Violation.Pillbug_Cannot_Touch_Stacks)
 
         if ply.rule == Rule.Place:
+            assert(ply.tile is None or isinstance(ply.tile, Tile))
+            
             check_queen_opening()
             check_queen_down_by_fourth_turn()
             
@@ -235,6 +247,8 @@ class HiveBoard(object):
                 else:
                     self.place(ply.tile, ply.dest)
         elif ply.rule == Rule.Move:
+            assert(ply.tile is None or isinstance(ply.tile, Tile))
+            
             if ply.tile is None:
                 ply = Ply(ply.rule,
                           self.piece_at(ply.origin),
@@ -253,6 +267,22 @@ class HiveBoard(object):
 
             if not self.one_hive_rule(ply.origin):
                 raise IllegalMove(Violation.One_Hive_Rule)
+            self.move(ply.origin, ply.dest)
+        elif ply.rule == Rule.Relocate:
+            assert(isinstance(ply.tile, tuple))
+            
+            acting_insect_coords = ply.tile
+            
+            ply = Ply(ply.rule,
+                      self.piece_at(acting_insect_coords),
+                      ply.origin,
+                      ply.dest)
+            
+            check_origin_dest_empty_adjacency(acting_insect_coords)
+            
+            if not self.one_hive_rule(ply.origin):
+                raise IllegalMove(Violation.One_Hive_Rule)
+            
             self.move(ply.origin, ply.dest)
 
         self._log.append(ply)

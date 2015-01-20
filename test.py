@@ -360,6 +360,33 @@ class TestHive(unittest.TestCase):
         
         self.assertSetEqual(set(board.valid_moves( (-1,0) )),
                             set([(0,-1), (-1,1)]))
+        
+    def test_pillbug_forced_relocation(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Pillbug), (-1,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Pillbug), (0,2))
+
+        with self.assertRaises(hive.IllegalMove) as e:
+            board.perform(hive.Ply(hive.Rule.Relocate, (-1,0), (0,0), (-1,1)))
+        self.assertEqual(e.exception.violation, hive.Violation.One_Hive_Rule)
+        
+        with self.assertRaises(hive.IllegalMove) as e:
+            board.perform(hive.Ply(hive.Rule.Relocate, (-1,0), (0,0), (0,-1)))
+        self.assertEqual(e.exception.violation, hive.Violation.One_Hive_Rule)
+
+        board.move((-1,0), (-1,2)) #illegal move for the sake of brevity
+        with self.assertRaises(hive.IllegalMove) as e:
+            board.perform(hive.Ply(hive.Rule.Relocate, (-1,2), (0,2), (5,5)))
+        self.assertEqual(e.exception.violation, hive.Violation.Pillbug_Adjacent)
+        
+        with self.assertRaises(hive.IllegalMove) as e:
+            board.perform(hive.Ply(hive.Rule.Relocate, (-1,2), (0,2), (0,1)))
+        self.assertEqual(e.exception.violation, hive.Violation.Pillbug_Cannot_Touch_Stacks)
+        
+        board.perform(hive.Ply(hive.Rule.Relocate, (-1,2), (0,2), (-2,2)))
                             
     def test_valid_path(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
