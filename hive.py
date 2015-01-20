@@ -223,7 +223,8 @@ class HiveBoard(object):
             if ply.origin not in neighbors or \
                 ply.dest not in neighbors:
                 raise IllegalMove(Violation.Pillbug_Adjacent)
-            elif ply.dest in self._pieces:
+            elif ply.dest in self._pieces or \
+                len(self.stack_at(ply.origin)) > 1:
                 raise IllegalMove(Violation.Pillbug_Cannot_Touch_Stacks)
 
         if ply.rule == Rule.Place:

@@ -387,6 +387,13 @@ class TestHive(unittest.TestCase):
         self.assertEqual(e.exception.violation, hive.Violation.Pillbug_Cannot_Touch_Stacks)
         
         board.perform(hive.Ply(hive.Rule.Relocate, (-1,2), (0,2), (-2,2)))
+        
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Beetle), (-2,1))
+        board.move((-2,1), (-2,2))
+        
+        with self.assertRaises(hive.IllegalMove) as e:
+            board.perform(hive.Ply(hive.Rule.Relocate, (-1,2), (-2,2), (-2,3)))
+        self.assertEqual(e.exception.violation, hive.Violation.Pillbug_Cannot_Touch_Stacks)
                             
     def test_valid_path(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
