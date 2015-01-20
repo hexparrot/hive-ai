@@ -421,6 +421,22 @@ class TestHive(unittest.TestCase):
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Ply(hive.Rule.Leech_Relocate, (0,-1), (0,0), (-1,0)))
         self.assertEqual(e.exception.violation, hive.Violation.One_Hive_Rule)
+        
+    def test_mosquito_leech_move(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Mosquito), (-1,0))
+
+        self.assertSetEqual(set(board.valid_moves( (-1,0) )),
+                            set([(0,-1), (-1,1)]))
+        
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Ant), (0,-1))
+
+        self.assertSetEqual(set(board.valid_moves( (-1,0) )),
+                            set([(-1,-1), (0,-2), (1,-2), (1,-1), (1,0), 
+                                 (1,1), (0,2), (-1,2), (-1,1)]))
                             
     def test_valid_path(self):
         board = hive.HiveBoard(queen_opening_allowed=True)

@@ -411,6 +411,29 @@ class HiveBoard(object):
 
             for i in s3:
                 yield i
+                
+        def mosquito():
+            valid_dests = set()
+            neighbors = self.hex_neighbors(self.tile_orientation, coords)
+            gained_movement = [self.piece_at(n).insect for n in neighbors if n in self._pieces]
+            
+            insect_map = {
+                Insect.Queen: queen_bee,
+                Insect.Beetle: beetle,
+                Insect.Grasshopper: grasshopper,
+                Insect.Ant: ant,
+                Insect.Spider: spider,
+                Insect.Ladybug: ladybug,
+                Insect.Pillbug: queen_bee, #shared movement logic with bee,
+                Insect.Mosquito: mosquito
+            }
+
+            for insect in gained_movement:
+                for j in insect_map[insect]():
+                    valid_dests.add(j)
+            
+            for i in valid_dests:
+                yield i
         
         return {
             Insect.Queen: queen_bee,
@@ -419,7 +442,8 @@ class HiveBoard(object):
             Insect.Ant: ant,
             Insect.Spider: spider,
             Insect.Ladybug: ladybug,
-            Insect.Pillbug: queen_bee #shared movement logic with bee
+            Insect.Pillbug: queen_bee, #shared movement logic with bee,
+            Insect.Mosquito: mosquito
             }[self.piece_at(coords).insect]()
 
     def valid_path(self, origin, dest):
