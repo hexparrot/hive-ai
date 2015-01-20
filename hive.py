@@ -229,6 +229,8 @@ class HiveBoard(object):
 
         if ply.rule == Rule.Place:
             assert(ply.tile is None or isinstance(ply.tile, Tile))
+            assert(ply.origin is None)
+            assert(isinstance(ply.dest, tuple))
             
             check_queen_opening()
             check_queen_down_by_fourth_turn()
@@ -249,6 +251,8 @@ class HiveBoard(object):
                     self.place(ply.tile, ply.dest)
         elif ply.rule == Rule.Move:
             assert(ply.tile is None or isinstance(ply.tile, Tile))
+            assert(isinstance(ply.origin, tuple))
+            assert(isinstance(ply.dest, tuple))
             
             if ply.tile is None:
                 ply = Ply(ply.rule,
@@ -271,6 +275,8 @@ class HiveBoard(object):
             self.move(ply.origin, ply.dest)
         elif ply.rule == Rule.Relocate:
             assert(isinstance(ply.tile, tuple))
+            assert(isinstance(ply.origin, tuple))
+            assert(isinstance(ply.dest, tuple))
             
             acting_insect_coords = ply.tile
             
