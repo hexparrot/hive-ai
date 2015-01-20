@@ -317,13 +317,42 @@ class HiveBoard(object):
 
             for i in s3:
                 yield i
+                
+        def ladybug():
+            checked = set()
+            s1 = set() #1 tile out
+            s2 = set() #2 tiles out
+            s3 = set() #3 tiles out
+            
+            checked.add(coords) 
+            #add initial space because it cannot be crawled back upon
+
+            for c in self.hex_neighbors(self.tile_orientation, coords):
+                if c in self._pieces:
+                    s1.add(c)
+                    checked.add(c)
+
+            for i in s1:
+                for c in self.hex_neighbors(self.tile_orientation, i):
+                    if c in self._pieces and c not in checked:
+                        s2.add(c)
+                        checked.add(c)
+            
+            for i in s2:
+                for c in self.hex_neighbors(self.tile_orientation, i):
+                    if c not in self._pieces and adjacent_to_something(coords, c) and c not in checked:
+                        s3.add(c)
+
+            for i in s3:
+                yield i
         
         return {
             Insect.Queen: queen_bee,
             Insect.Beetle: beetle,
             Insect.Grasshopper: grasshopper,
             Insect.Ant: ant,
-            Insect.Spider: spider
+            Insect.Spider: spider,
+            Insect.Ladybug: ladybug
             }[self.piece_at(coords).insect]()
 
     def valid_path(self, origin, dest):
