@@ -352,7 +352,8 @@ class HiveBoard(object):
             Insect.Grasshopper: grasshopper,
             Insect.Ant: ant,
             Insect.Spider: spider,
-            Insect.Ladybug: ladybug
+            Insect.Ladybug: ladybug,
+            Insect.Pillbug: queen_bee #shared movement logic with bee
             }[self.piece_at(coords).insect]()
 
     def valid_path(self, origin, dest):
