@@ -437,6 +437,15 @@ class TestHive(unittest.TestCase):
         self.assertSetEqual(set(board.valid_moves( (-1,0) )),
                             set([(-1,-1), (0,-2), (1,-2), (1,-1), (1,0), 
                                  (1,1), (0,2), (-1,2), (-1,1)]))
+                                 
+        
+        
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Mosquito), (-1,-1))
+        
+        self.assertSetEqual(set(board.valid_moves( (-1,-1) )),
+                            set([(0,-2), (1,-2), (1,-1), (1,0), 
+                                 (1,1), (0,2), (-1,2), (-1,1),
+                                 (-2,1), (-2,0)]))
                             
     def test_valid_path(self):
         board = hive.HiveBoard(queen_opening_allowed=True)

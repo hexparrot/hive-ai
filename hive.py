@@ -424,9 +424,12 @@ class HiveBoard(object):
                 Insect.Ant: ant,
                 Insect.Spider: spider,
                 Insect.Ladybug: ladybug,
-                Insect.Pillbug: queen_bee, #shared movement logic with bee,
-                Insect.Mosquito: mosquito
+                Insect.Pillbug: queen_bee #shared movement logic with bee,
+                #mosquito left out deliberately--would recurse indefinitely
             }
+            
+            if Insect.Mosquito in gained_movement:
+                gained_movement.remove(Insect.Mosquito)
 
             for insect in gained_movement:
                 for j in insect_map[insect]():
