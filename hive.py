@@ -64,6 +64,8 @@ class Rule(Enum):
     Place = 0
     Move = 1
     Relocate = 2
+    Leech_Move = 3
+    Leech_Relocate = 4
     
 class Violation(Enum):
     Queen_Bee_Opening_Prohibited = 'Current rules disallow Queen Bee opening'
@@ -79,6 +81,7 @@ class Violation(Enum):
     One_Hive_Rule = 'Movement/placement may not split hive into separate pieces, even in-transit'
     Pillbug_Adjacent = 'Origin and dest must both be adjacent to pillbug'
     Pillbug_Cannot_Touch_Stacks = 'Pillbugs may not grab from or place onto stacks'
+    Unavailable_Action = 'The active tile does not have access to this action'
 
 class HiveBoard(object):
     def __init__(self,
@@ -226,6 +229,11 @@ class HiveBoard(object):
             elif ply.dest in self._pieces or \
                 len(self.stack_at(ply.origin)) > 1:
                 raise IllegalMove(Violation.Pillbug_Cannot_Touch_Stacks)
+        
+        def check_mosquito_adjacent_to_pillbug(mosquito_coords):
+            neighbors = self.hex_neighbors(self.tile_orientation, mosquito_coords)
+            if not any(self._pieces[n][-1].insect == Insect.Pillbug for n in neighbors if n in self._pieces):
+                raise IllegalMove(Violation.Unavailable_Action)
 
         if ply.rule == Rule.Place:
             assert(ply.tile is None or isinstance(ply.tile, Tile))
@@ -278,18 +286,39 @@ class HiveBoard(object):
             assert(isinstance(ply.origin, tuple))
             assert(isinstance(ply.dest, tuple))
             
-            acting_insect_coords = ply.tile
+            pillbug_coords = ply.tile
             
             ply = Ply(ply.rule,
-                      self.piece_at(acting_insect_coords),
+                      self.piece_at(pillbug_coords),
                       ply.origin,
                       ply.dest)
             
-            check_origin_dest_empty_adjacency(acting_insect_coords)
+            check_origin_dest_empty_adjacency(pillbug_coords)
             
             if not self.one_hive_rule(ply.origin):
                 raise IllegalMove(Violation.One_Hive_Rule)
             
+            self.move(ply.origin, ply.dest)
+        elif ply.rule == Rule.Leech_Relocate:
+            assert(isinstance(ply.tile, tuple))
+            assert(isinstance(ply.origin, tuple))
+            assert(isinstance(ply.dest, tuple))
+
+            mosquite_coords = ply.tile
+            
+            assert(self.piece_at(mosquite_coords).insect == Insect.Mosquito)
+            
+            ply = Ply(ply.rule,
+                      self.piece_at(mosquite_coords),
+                      ply.origin,
+                      ply.dest)
+            
+            check_mosquito_adjacent_to_pillbug(mosquite_coords)
+            check_origin_dest_empty_adjacency(mosquite_coords)
+            
+            if not self.one_hive_rule(ply.origin):
+                raise IllegalMove(Violation.One_Hive_Rule)
+                
             self.move(ply.origin, ply.dest)
 
         self._log.append(ply)
