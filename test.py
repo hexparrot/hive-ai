@@ -393,6 +393,13 @@ class TestHive(unittest.TestCase):
         self.assertEqual(board.valid_path((1,1), (-1,3)),
                          [(1,1), (0,2), (-1,3)])
 
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Ladybug), (0,-3))
+        
+        self.assertEqual(board.valid_path((0,-3), (-1,0)),
+                         [(0,-3), (0,-2), (0,-1), (-1,0)])
+        self.assertEqual(board.valid_path((0,-3), (1,-1)),
+                         [(0,-3), (0,-2), (0,-1), (1,-1)])
+
     def test_freedom_of_movement(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
         board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
