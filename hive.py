@@ -415,7 +415,7 @@ class HiveBoard(object):
         def mosquito():
             valid_dests = set()
             neighbors = self.hex_neighbors(self.tile_orientation, coords)
-            gained_movement = [self.piece_at(n).insect for n in neighbors if n in self._pieces]
+            gained_movement = set(self.piece_at(n).insect for n in neighbors if n in self._pieces)
             
             insect_map = {
                 Insect.Queen: queen_bee,
