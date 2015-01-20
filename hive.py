@@ -395,7 +395,7 @@ class HiveBoard(object):
             
             for n in self.hex_neighbors(self.tile_orientation, current):
                 if n not in came_from:
-                    if insect in [Insect.Spider, Insect.Ant, Insect.Queen]:                        
+                    if insect in [Insect.Spider, Insect.Ant, Insect.Queen, Insect.Pillbug]:                        
                         if n not in self._pieces:
                             frontier.put(n)
                             came_from[n] = current
