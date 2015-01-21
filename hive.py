@@ -9,27 +9,35 @@ __email__ = "wdchromium@gmail.com"
 from enum import Enum
 
 class Ply(object):
-    def __init__(self, rule, tile, origin, dest):
-        self._rule = rule
-        self._tile = tile
-        self._origin = origin
-        self._dest = dest
+    def __init__(self, rule, tile):
+        self.rule = rule
+        self.tile = tile
         
-    @property
-    def rule(self):
-        return self._rule
-    
-    @property
-    def tile(self):
-        return self._tile
-    
-    @property
-    def origin(self):
-        return self._origin
-    
-    @property
-    def dest(self):
-        return self._dest
+class Placement(Ply):
+    def __init__(self, tile, dest):
+        super().__init__(Rule.Place, tile)
+        self.dest = dest
+
+class Movement(Ply):
+    def __init__(self, origin, dest, leech_from=None):
+        if leech_from:
+            super().__init__(Rule.Leech_Move, None)
+            self.leech_from = leech_from
+        else:
+            super().__init__(Rule.Move, None)
+            
+        self.origin = origin
+        self.dest = dest
+
+class Relocation(Ply):
+    def __init__(self, tile, origin, dest, mover_loc, leech_from=None):
+        if leech_from:
+            super().__init__(Rule.Leech_Relocate, tile)
+            self.leech_from = leech_from
+        else:
+            super().__init__(Rule.Relocate, tile)
+            
+        self.mover_loc = mover_loc
 
 class Tile(object):
     def __init__(self, color, insect):
@@ -278,8 +286,7 @@ class HiveBoard(object):
                 raise IllegalMove(Violation.Unavailable_Action)
 
         if ply.rule == Rule.Place:
-            assert(ply.tile is None or isinstance(ply.tile, Tile))
-            assert(ply.origin is None)
+            assert(isinstance(ply.tile, Tile))
             assert(isinstance(ply.dest, tuple))
             
             check_queen_opening()
@@ -300,16 +307,11 @@ class HiveBoard(object):
                 else:
                     return ply
         elif ply.rule == Rule.Move:
-            assert(ply.tile is None or isinstance(ply.tile, Tile))
             assert(isinstance(ply.origin, tuple))
             assert(isinstance(ply.dest, tuple))
             
-            if ply.tile is None:
-                ply = Ply(ply.rule,
-                          self.piece_at(ply.origin),
-                          ply.origin,
-                          ply.dest)
-                          
+            ply.tile = self.piece_at(ply.origin)
+
             if not queen_placed(ply.tile.color):
                 raise IllegalMove(Violation.No_Movement_Before_Queen_Bee_Placed)
             
