@@ -128,8 +128,23 @@ class HiveBoard(object):
         
     def stack_at(self, coords):
         return self._pieces[coords]
+    
+    def perform(self, ply):
+
+        ply = self.validate(ply)        
         
-    def perform(self, ply):  
+        if ply.rule == Rule.Place:
+            self.place(ply.tile, ply.dest)
+        elif ply.rule == Rule.Move:
+            self.move(ply.origin, ply.dest)
+        elif ply.rule == Rule.Relocate:
+            self.move(ply.origin, ply.dest)
+        elif ply.rule == Rule.Leech_Relocate:
+            self.move(ply.origin, ply.dest)
+
+        self._log.append(ply)
+    
+    def validate(self, ply):  
         Flat_Blocking = {
             Flat_Directions.N: (Flat_Directions.NW, Flat_Directions.NE),
             Flat_Directions.NE: (Flat_Directions.N, Flat_Directions.SE),
@@ -251,10 +266,10 @@ class HiveBoard(object):
             check_queen_down_by_fourth_turn()
             
             if self.ply_number == 0:
-                self.place(ply.tile, ply.dest)
+                return ply
             elif self.ply_number == 1:
                 if placed_adjacent_to_opponent(ply.tile.color):
-                    self.place(ply.tile, ply.dest)
+                    return ply
                 else:
                     raise IllegalMove(Violation.Must_Place_Adjacent)
             else:
@@ -263,7 +278,7 @@ class HiveBoard(object):
                 elif not any(c in self._pieces for c in self.hex_neighbors(self.tile_orientation, ply.dest)):
                     raise IllegalMove(Violation.One_Hive_Rule)
                 else:
-                    self.place(ply.tile, ply.dest)
+                    return ply
         elif ply.rule == Rule.Move:
             assert(ply.tile is None or isinstance(ply.tile, Tile))
             assert(isinstance(ply.origin, tuple))
@@ -287,7 +302,8 @@ class HiveBoard(object):
 
             if not self.one_hive_rule(ply.origin):
                 raise IllegalMove(Violation.One_Hive_Rule)
-            self.move(ply.origin, ply.dest)
+                
+            return ply
         elif ply.rule == Rule.Relocate:
             assert(isinstance(ply.tile, tuple))
             assert(isinstance(ply.origin, tuple))
@@ -305,7 +321,7 @@ class HiveBoard(object):
             if not self.one_hive_rule(ply.origin):
                 raise IllegalMove(Violation.One_Hive_Rule)
             
-            self.move(ply.origin, ply.dest)
+            return ply
         elif ply.rule == Rule.Leech_Relocate:
             assert(isinstance(ply.tile, tuple))
             assert(isinstance(ply.origin, tuple))
@@ -326,9 +342,7 @@ class HiveBoard(object):
             if not self.one_hive_rule(ply.origin):
                 raise IllegalMove(Violation.One_Hive_Rule)
                 
-            self.move(ply.origin, ply.dest)
-
-        self._log.append(ply)
+            return ply
         
     def valid_moves(self, coords):
         def adjacent_to_something(ignored_origin, dest):
