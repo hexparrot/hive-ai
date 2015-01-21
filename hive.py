@@ -101,6 +101,13 @@ class HiveBoard(object):
 
         return str(hg)
         
+    def quick_setup(self, arrangement):
+        for coord, piece in arrangement.items():
+            c = next(k for k in Color if k.value==piece[0])
+            i = next(k for k in Insect if k.value==piece[1])
+            
+            self.place(Tile(c,i), coord)
+        
     def move(self, origin, dest):
         t = self._pieces[origin].pop()
         if not self._pieces[origin]:

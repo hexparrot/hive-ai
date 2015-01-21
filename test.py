@@ -280,6 +280,22 @@ class TestHive(unittest.TestCase):
             board.perform(hive.Ply(hive.Rule.Move, None, (0,-1), (0,-1)))
         self.assertEqual(e.exception.violation, hive.Violation.Did_Not_Move)
 
+    def test_board_quicksetup(self):
+        board = hive.HiveBoard()
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ'      
+        }
+        
+        board.quick_setup(pieces)
+        
+        self.assertEqual(board.piece_at((0,0)).color, hive.Color.White)
+        self.assertEqual(board.piece_at((0,0)).insect, hive.Insect.Queen)
+        
+        self.assertEqual(board.piece_at((0,1)).color, hive.Color.Black)
+        self.assertEqual(board.piece_at((0,1)).insect, hive.Insect.Queen)
+
     def test_queen_valid_moves(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
 
