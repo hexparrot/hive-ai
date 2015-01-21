@@ -130,19 +130,19 @@ class HiveBoard(object):
         return self._pieces[coords]
     
     def perform(self, ply):
-
-        ply = self.validate(ply)        
+        assert(ply.rule in Rule)
         
-        if ply.rule == Rule.Place:
-            self.place(ply.tile, ply.dest)
-        elif ply.rule == Rule.Move:
-            self.move(ply.origin, ply.dest)
-        elif ply.rule == Rule.Relocate:
-            self.move(ply.origin, ply.dest)
-        elif ply.rule == Rule.Leech_Relocate:
-            self.move(ply.origin, ply.dest)
-
-        self._log.append(ply)
+        try:
+            ply = self.validate(ply)      
+        except IllegalMove:
+            raise
+        else:
+            if ply.rule == Rule.Place:
+                self.place(ply.tile, ply.dest)
+            elif ply.rule in [Rule.Move, Rule.Relocate, Rule.Leech_Relocate]:
+                self.move(ply.origin, ply.dest)
+    
+            self._log.append(ply)
     
     def validate(self, ply):  
         Flat_Blocking = {
