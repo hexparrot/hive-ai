@@ -30,14 +30,16 @@ class Movement(Ply):
         self.dest = dest
 
 class Relocation(Ply):
-    def __init__(self, tile, origin, dest, mover_loc, leech_from=None):
+    def __init__(self, origin, dest, actor_loc, leech_from=None):
         if leech_from:
-            super().__init__(Rule.Leech_Relocate, tile)
+            super().__init__(Rule.Leech_Relocate, None)
             self.leech_from = leech_from
         else:
-            super().__init__(Rule.Relocate, tile)
-            
-        self.mover_loc = mover_loc
+            super().__init__(Rule.Relocate, None)
+        
+        self.origin = origin
+        self.dest = dest
+        self.actor_loc = actor_loc
 
 class Tile(object):
     def __init__(self, color, insect):
@@ -327,39 +329,30 @@ class HiveBoard(object):
                 
             return ply
         elif ply.rule == Rule.Relocate:
-            assert(isinstance(ply.tile, tuple))
             assert(isinstance(ply.origin, tuple))
             assert(isinstance(ply.dest, tuple))
+            assert(isinstance(ply.actor_loc, tuple))
             
-            pillbug_coords = ply.tile
+            ply.tile = self.piece_at(ply.actor_loc)
             
-            ply = Ply(ply.rule,
-                      self.piece_at(pillbug_coords),
-                      ply.origin,
-                      ply.dest)
-            
-            check_origin_dest_empty_adjacency(pillbug_coords)
+            check_origin_dest_empty_adjacency(ply.actor_loc)
             
             if not self.one_hive_rule(ply.origin):
                 raise IllegalMove(Violation.One_Hive_Rule)
             
             return ply
         elif ply.rule == Rule.Leech_Relocate:
-            assert(isinstance(ply.tile, tuple))
             assert(isinstance(ply.origin, tuple))
             assert(isinstance(ply.dest, tuple))
-
-            mosquite_coords = ply.tile
+            assert(isinstance(ply.actor_loc, tuple))
+            assert(self.piece_at(ply.actor_loc).insect == Insect.Mosquito)
             
-            assert(self.piece_at(mosquite_coords).insect == Insect.Mosquito)
+            mosquito_coords = ply.actor_loc            
             
-            ply = Ply(ply.rule,
-                      self.piece_at(mosquite_coords),
-                      ply.origin,
-                      ply.dest)
+            ply.tile = self.piece_at(mosquito_coords)
             
-            check_mosquito_adjacent_to_pillbug(mosquite_coords)
-            check_origin_dest_empty_adjacency(mosquite_coords)
+            check_mosquito_adjacent_to_pillbug(mosquito_coords)
+            check_origin_dest_empty_adjacency(mosquito_coords)
             
             if not self.one_hive_rule(ply.origin):
                 raise IllegalMove(Violation.One_Hive_Rule)

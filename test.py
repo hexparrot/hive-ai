@@ -386,29 +386,29 @@ class TestHive(unittest.TestCase):
         board.place(hive.Tile(hive.Color.Black, hive.Insect.Pillbug), (0,2))
 
         with self.assertRaises(hive.IllegalMove) as e:
-            board.perform(hive.Ply(hive.Rule.Relocate, (-1,0), (0,0), (-1,1)))
+            board.perform(hive.Relocation((0,0), (-1,1), (-1,0)))
         self.assertEqual(e.exception.violation, hive.Violation.One_Hive_Rule)
         
         with self.assertRaises(hive.IllegalMove) as e:
-            board.perform(hive.Ply(hive.Rule.Relocate, (-1,0), (0,0), (0,-1)))
+            board.perform(hive.Relocation((0,0), (0,-1), (-1,0)))
         self.assertEqual(e.exception.violation, hive.Violation.One_Hive_Rule)
 
         board.move((-1,0), (-1,2)) #illegal move for the sake of brevity
         with self.assertRaises(hive.IllegalMove) as e:
-            board.perform(hive.Ply(hive.Rule.Relocate, (-1,2), (0,2), (5,5)))
+            board.perform(hive.Relocation((0,2), (5,5), (-1,2)))
         self.assertEqual(e.exception.violation, hive.Violation.Pillbug_Adjacent)
         
         with self.assertRaises(hive.IllegalMove) as e:
-            board.perform(hive.Ply(hive.Rule.Relocate, (-1,2), (0,2), (0,1)))
+            board.perform(hive.Relocation((0,2), (0,1), (-1,2)))
         self.assertEqual(e.exception.violation, hive.Violation.Pillbug_Cannot_Touch_Stacks)
         
-        board.perform(hive.Ply(hive.Rule.Relocate, (-1,2), (0,2), (-2,2)))
+        board.perform(hive.Relocation((0,2), (-2,2), (-1,2)))
         
         board.place(hive.Tile(hive.Color.Black, hive.Insect.Beetle), (-2,1))
         board.move((-2,1), (-2,2))
         
         with self.assertRaises(hive.IllegalMove) as e:
-            board.perform(hive.Ply(hive.Rule.Relocate, (-1,2), (-2,2), (-2,3)))
+            board.perform(hive.Relocation((-2,2), (-2,3), (-1,2)))
         self.assertEqual(e.exception.violation, hive.Violation.Pillbug_Cannot_Touch_Stacks)
         
     def test_mosquito_leech_relocate(self):
@@ -424,18 +424,20 @@ class TestHive(unittest.TestCase):
         board.place(hive.Tile(hive.Color.Black, hive.Insect.Spider), (-1,3))
 
         with self.assertRaises(hive.IllegalMove) as e:
-            board.perform(hive.Ply(hive.Rule.Leech_Relocate, (0,-1), (-1,0), (5,5)))
+            board.perform(hive.Relocation((-1,0), (5,5), (0,-1)))
         self.assertEqual(e.exception.violation, hive.Violation.Pillbug_Adjacent)
         
+        print(board)
+        
         with self.assertRaises(hive.IllegalMove) as e:
-            board.perform(hive.Ply(hive.Rule.Leech_Relocate, (0,3), (-1,3), (1,2)))
+            board.perform(hive.Relocation((-1,3), (1,2), (0,3), None))
         self.assertEqual(e.exception.violation, hive.Violation.Unavailable_Action)
         
-        board.perform(hive.Ply(hive.Rule.Leech_Relocate, (0,-1), (-1,0), (1,-1)))
+        board.perform(hive.Relocation((-1,0), (1,-1), (0,-1), None))
         self.assertEqual(board._pieces[(1,-1)][0], pb)
 
         with self.assertRaises(hive.IllegalMove) as e:
-            board.perform(hive.Ply(hive.Rule.Leech_Relocate, (0,-1), (0,0), (-1,0)))
+            board.perform(hive.Relocation((0,0), (-1,0), (0,-1), None))
         self.assertEqual(e.exception.violation, hive.Violation.One_Hive_Rule)
         
     def test_mosquito_leech_move(self):
