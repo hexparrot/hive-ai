@@ -7,9 +7,29 @@ __version__ = "0.0.1"
 __email__ = "wdchromium@gmail.com"
 
 from enum import Enum
-from collections import namedtuple
 
-Ply = namedtuple('Ply', 'rule tile origin dest')
+class Ply(object):
+    def __init__(self, rule, tile, origin, dest):
+        self._rule = rule
+        self._tile = tile
+        self._origin = origin
+        self._dest = dest
+        
+    @property
+    def rule(self):
+        return self._rule
+    
+    @property
+    def tile(self):
+        return self._tile
+    
+    @property
+    def origin(self):
+        return self._origin
+    
+    @property
+    def dest(self):
+        return self._dest
 
 class Tile(object):
     def __init__(self, color, insect):
