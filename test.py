@@ -41,8 +41,9 @@ class TestHive(unittest.TestCase):
         
         t2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(hive.IllegalMove) as e:
             board.place(t2, (0,0))
+        self.assertEqual(e.exception.violation, hive.Violation.May_Not_Place_On_Other_Pieces)
 
     def test_piece_at(self):
         board = hive.HiveBoard()
@@ -54,12 +55,19 @@ class TestHive(unittest.TestCase):
     
     def test_stack_at(self):
         board = hive.HiveBoard()
-        piece = hive.Tile(hive.Color.White, hive.Insect.Queen)
-        piece_2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ',
+            (0,-1): 'wB'   
+        }
+        
+        board.quick_setup(pieces)
+        board.move((0,-1), (0,0))
 
-        board.place(piece, (0,0))
-        with self.assertRaises(RuntimeError):
-            board.place(piece_2, (0,0))
+        self.assertEqual(board.stack_at((0,0)),
+                         [hive.Tile(hive.Color.White, hive.Insect.Queen),
+                          hive.Tile(hive.Color.White, hive.Insect.Beetle) ])
             
     def test_move(self):
         board = hive.HiveBoard()

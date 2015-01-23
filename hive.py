@@ -113,6 +113,7 @@ class Violation(Enum):
     Mosquito_Adjacent = 'Mosquito must both be adjacent to pillbug'
     Pillbug_Cannot_Touch_Stacks = 'Pillbugs may not grab from or place onto stacks'
     Unavailable_Action = 'The active tile does not have access to this action'
+    May_Not_Place_On_Other_Pieces = 'Pieces may not initially be placed on other pieces'
 
 class HiveBoard(object):
     def __init__(self,
@@ -151,7 +152,7 @@ class HiveBoard(object):
         
     def place(self, tile, coords):
         if coords in self._pieces:
-            raise RuntimeError
+            raise IllegalMove(Violation.May_Not_Place_On_Other_Pieces)
         self._pieces[coords] = [tile]
         
     def piece_at(self, coords):
