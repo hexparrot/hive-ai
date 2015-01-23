@@ -331,6 +331,9 @@ class HiveBoard(object):
             assert(isinstance(ply.actor_loc, tuple) and ply.actor_loc)
             
             ply.tile = self.piece_at(ply.actor_loc)
+            
+            if self.piece_at(ply.actor_loc).insect != Insect.Pillbug:
+                raise IllegalMove(Violation.Unavailable_Action)
 
             check_origin_dest_empty_adjacency(ply.actor_loc)
             

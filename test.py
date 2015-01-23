@@ -410,6 +410,10 @@ class TestHive(unittest.TestCase):
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Relocation((-2,2), (-2,3), (-1,2)))
         self.assertEqual(e.exception.violation, hive.Violation.Pillbug_Cannot_Touch_Stacks)
+
+        with self.assertRaises(hive.IllegalMove) as e:
+            board.perform(hive.Relocation((0,-1), (1,0), (0,1)))
+        self.assertEqual(e.exception.violation, hive.Violation.Unavailable_Action)
         
     def test_mosquito_leech_relocate(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
