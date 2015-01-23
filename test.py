@@ -438,6 +438,25 @@ class TestHive(unittest.TestCase):
                             set([(0,-2), (1,-2), (1,-1), (1,0), 
                                  (1,1), (0,2), (-1,2), (-1,1),
                                  (-2,1), (-2,0)]))
+                                 
+    def test_mosquito_leech_climb(self):
+        board = hive.HiveBoard()
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ',
+            (0,-1): 'wB',
+            (0,-2): 'bM'  
+        }
+        
+        board.quick_setup(pieces)
+        
+        p = hive.Movement((0,-2), (0,-1), (0,-1))
+        board.perform(p)
+        
+        self.assertEqual(board.stack_at((0,-1)),
+                         [hive.Tile(hive.Color.White, hive.Insect.Beetle),
+                          hive.Tile(hive.Color.Black, hive.Insect.Mosquito)])
                             
     def test_valid_path(self):
         board = hive.HiveBoard(queen_opening_allowed=True)

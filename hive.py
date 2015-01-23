@@ -172,7 +172,8 @@ class HiveBoard(object):
         else:
             if ply.rule == Rule.Place:
                 self.place(ply.tile, ply.dest)
-            elif ply.rule in [Rule.Move, Rule.Relocate, Rule.Leech_Relocate]:
+            elif ply.rule in [Rule.Move, Rule.Leech_Move,
+                              Rule.Relocate, Rule.Leech_Relocate]:
                 self.move(ply.origin, ply.dest)
     
             self._log.append(ply)
@@ -358,10 +359,15 @@ class HiveBoard(object):
             check_origin_dest_empty_adjacency(ply.actor_loc)
             
             return ply
+        elif ply.rule == Rule.Leech_Move:
+            if ply.dest in set(self.valid_moves(ply.origin, self.piece_at(ply.leech_from).insect)):
+                return ply
+            #else:
+            #    raise IllegalMove(Violation.Unavailable_Action)
         else:
             raise RuntimeError
         
-    def valid_moves(self, coords):
+    def valid_moves(self, coords, acting_as=None):
         def adjacent_to_something(ignored_origin, dest):
             for c in self.hex_neighbors(self.tile_orientation, dest):
                 if c in self._pieces and c != ignored_origin:
@@ -475,6 +481,8 @@ class HiveBoard(object):
             
             for i in valid_dests:
                 yield i
+                
+        insect = acting_as or self.piece_at(coords).insect
         
         return {
             Insect.Queen: queen_bee,
@@ -485,7 +493,7 @@ class HiveBoard(object):
             Insect.Ladybug: ladybug,
             Insect.Pillbug: queen_bee, #shared movement logic with bee,
             Insect.Mosquito: mosquito
-            }[self.piece_at(coords).insect]()
+            }[insect]()
 
     def valid_path(self, origin, dest):
         '''this function will find a valid path for the tiles from A->B.
