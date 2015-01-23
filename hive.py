@@ -334,29 +334,14 @@ class HiveBoard(object):
             assert(isinstance(ply.actor_loc, tuple))
             
             ply.tile = self.piece_at(ply.actor_loc)
-            
+
             check_origin_dest_empty_adjacency(ply.actor_loc)
-            
+
+            if self.piece_at(ply.actor_loc).insect != Insect.Pillbug:
+                check_mosquito_adjacent_to_pillbug(ply.actor_loc)
             if not self.one_hive_rule(ply.origin):
                 raise IllegalMove(Violation.One_Hive_Rule)
             
-            return ply
-        elif ply.rule == Rule.Leech_Relocate:
-            assert(isinstance(ply.origin, tuple))
-            assert(isinstance(ply.dest, tuple))
-            assert(isinstance(ply.actor_loc, tuple))
-            assert(self.piece_at(ply.actor_loc).insect == Insect.Mosquito)
-            
-            mosquito_coords = ply.actor_loc            
-            
-            ply.tile = self.piece_at(mosquito_coords)
-            
-            check_mosquito_adjacent_to_pillbug(mosquito_coords)
-            check_origin_dest_empty_adjacency(mosquito_coords)
-            
-            if not self.one_hive_rule(ply.origin):
-                raise IllegalMove(Violation.One_Hive_Rule)
-                
             return ply
         
     def valid_moves(self, coords):

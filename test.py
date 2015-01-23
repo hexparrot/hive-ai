@@ -426,9 +426,7 @@ class TestHive(unittest.TestCase):
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Relocation((-1,0), (5,5), (0,-1)))
         self.assertEqual(e.exception.violation, hive.Violation.Pillbug_Adjacent)
-        
-        print(board)
-        
+
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Relocation((-1,3), (1,2), (0,3), None))
         self.assertEqual(e.exception.violation, hive.Violation.Unavailable_Action)
