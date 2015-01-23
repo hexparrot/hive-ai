@@ -103,12 +103,10 @@ class TestHive(unittest.TestCase):
     def test_rule_movement_before_queen_placed(self):
         board = hive.HiveBoard()
 
-        t = hive.Tile(hive.Color.White, hive.Insect.Ant)
-        p = hive.Placement(t, (0,0))
+        p = hive.Placement(hive.Tile(hive.Color.White, hive.Insect.Ant), (0,0))
         board.perform(p)
         
-        t2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
-        p2 = hive.Placement(t2, (0,1))
+        p2 = hive.Placement(hive.Tile(hive.Color.Black, hive.Insect.Ant), (0,1))
         board.perform(p2)
         
         p3 = hive.Movement((0,0), (1,0))
@@ -121,12 +119,10 @@ class TestHive(unittest.TestCase):
     def test_rule_adjacency_to_opponent(self):
         board = hive.HiveBoard()
         
-        t = hive.Tile(hive.Color.White, hive.Insect.Ant)
-        p = hive.Placement(t, (0,0))
+        p = hive.Placement(hive.Tile(hive.Color.White, hive.Insect.Ant), (0,0))
         board.perform(p)
         
-        t2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
-        p2 = hive.Placement(t2, (0,1))
+        p2 = hive.Placement(hive.Tile(hive.Color.Black, hive.Insect.Ant), (0,1))
         board.perform(p2)
         
         t3 = hive.Tile(hive.Color.White, hive.Insect.Ant)
@@ -143,35 +139,16 @@ class TestHive(unittest.TestCase):
     def test_rule_placed_queen_by_fourth_action(self):
         board = hive.HiveBoard()
         
-        t1 = hive.Tile(hive.Color.White, hive.Insect.Ant)
-        p1 = hive.Placement(t1, (0,0))
-
-        t2 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
-        p2 = hive.Placement(t2, (0,1))
-
-        t3 = hive.Tile(hive.Color.White, hive.Insect.Ant)
-        p3 = hive.Placement(t3, (0,-1))
-        
-        t4 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
-        p4 = hive.Placement(t4, (0,2))
-
-        t5 = hive.Tile(hive.Color.White, hive.Insect.Ant)
-        p5 = hive.Placement(t5, (0,-2))
-        
-        t6 = hive.Tile(hive.Color.Black, hive.Insect.Ant)
-        p6 = hive.Placement(t6, (0,3))
-        
-        t7_a = hive.Tile(hive.Color.White, hive.Insect.Spider)
-        p7_a = hive.Placement(t7_a, (0,-3))
-        
-        t7_b = hive.Tile(hive.Color.White, hive.Insect.Queen)
-        p7_b = hive.Placement(t7_b, (0,-3))
-        
-        t8_a = hive.Tile(hive.Color.Black, hive.Insect.Spider)
-        p8_a = hive.Placement(t8_a, (0,4))
-        
-        t8_b = hive.Tile(hive.Color.Black, hive.Insect.Queen)
-        p8_b = hive.Placement(t8_b, (0,4))
+        p1 = hive.Placement(hive.Tile(hive.Color.White, hive.Insect.Ant), (0,0))
+        p2 = hive.Placement(hive.Tile(hive.Color.Black, hive.Insect.Ant), (0,1))
+        p3 = hive.Placement(hive.Tile(hive.Color.White, hive.Insect.Ant), (0,-1))
+        p4 = hive.Placement(hive.Tile(hive.Color.Black, hive.Insect.Ant), (0,2))
+        p5 = hive.Placement(hive.Tile(hive.Color.White, hive.Insect.Ant), (0,-2))
+        p6 = hive.Placement(hive.Tile(hive.Color.Black, hive.Insect.Ant), (0,3))
+        p7_a = hive.Placement(hive.Tile(hive.Color.White, hive.Insect.Spider), (0,-3))
+        p7_b = hive.Placement(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,-3))
+        p8_a = hive.Placement(hive.Tile(hive.Color.Black, hive.Insect.Spider), (0,4))
+        p8_b = hive.Placement(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,4))
         
         for e in [p1, p2, p3, p4, p5, p6]:
             board.perform(e)
@@ -193,20 +170,16 @@ class TestHive(unittest.TestCase):
     def test_special_rules_queen_opening_prohibited(self):
         '''tourney rules about queen not available on move 1'''
         board = hive.HiveBoard(queen_opening_allowed=False)
-        
-        t1_a = hive.Tile(hive.Color.White, hive.Insect.Queen)
-        p1_a = hive.Placement(t1_a, (0,0))
+ 
+        p1_a = hive.Placement(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
         
         with self.assertRaises(hive.IllegalMove):
             board.perform(p1_a)
-            
-        t1_z = hive.Tile(hive.Color.White, hive.Insect.Ant)
-        p1_z = hive.Placement(t1_z, (0,0))
-        
+
+        p1_z = hive.Placement(hive.Tile(hive.Color.White, hive.Insect.Ant), (0,0))
         board.perform(p1_z)
         
-        t2_a = hive.Tile(hive.Color.Black, hive.Insect.Queen)
-        p2_a = hive.Placement(t2_a, (0,1))
+        p2_a = hive.Placement(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
         
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(p2_a)
@@ -217,12 +190,10 @@ class TestHive(unittest.TestCase):
         '''tourney rules about queen not available on move 1'''
         board = hive.HiveBoard(queen_opening_allowed=True)
         
-        t1_a = hive.Tile(hive.Color.White, hive.Insect.Queen)
-        p1_a = hive.Placement(t1_a, (0,0))
+        p1_a = hive.Placement(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
         board.perform(p1_a)
         
-        t2_a = hive.Tile(hive.Color.Black, hive.Insect.Queen)
-        p2_a = hive.Placement(t2_a, (0,1))
+        p2_a = hive.Placement(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
         board.perform(p2_a)
         
     def test_ply_number_property(self):
@@ -230,8 +201,7 @@ class TestHive(unittest.TestCase):
         
         self.assertEqual(board.ply_number, 0)
         
-        t = hive.Tile(hive.Color.White, hive.Insect.Ant)
-        p = hive.Placement(t, (0,0))
+        p = hive.Placement(hive.Tile(hive.Color.White, hive.Insect.Ant), (0,0))
         board.perform(p)
         
         self.assertEqual(board.ply_number, 1)
