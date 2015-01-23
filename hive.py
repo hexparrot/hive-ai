@@ -163,7 +163,8 @@ class HiveBoard(object):
         assert(ply.rule in Rule)
         
         try:
-            ply = self.validate(ply)      
+            ply = self.validate(ply)
+            assert(ply)
         except IllegalMove:
             raise
         else:
@@ -281,11 +282,7 @@ class HiveBoard(object):
             elif ply.dest in self._pieces or \
                 len(self.stack_at(ply.origin)) > 1:
                 raise IllegalMove(Violation.Pillbug_Cannot_Touch_Stacks)
-        
-        def check_mosquito_adjacent_to_pillbug(mosquito_coords):
-            neighbors = self.hex_neighbors(self.tile_orientation, mosquito_coords)
-            if not any(self._pieces[n][-1].insect == Insect.Pillbug for n in neighbors if n in self._pieces):
-                raise IllegalMove(Violation.Unavailable_Action)
+
 
         if ply.rule == Rule.Place:
             assert(isinstance(ply.tile, Tile))
@@ -331,18 +328,32 @@ class HiveBoard(object):
         elif ply.rule == Rule.Relocate:
             assert(isinstance(ply.origin, tuple))
             assert(isinstance(ply.dest, tuple))
-            assert(isinstance(ply.actor_loc, tuple))
+            assert(isinstance(ply.actor_loc, tuple) and ply.actor_loc)
             
             ply.tile = self.piece_at(ply.actor_loc)
 
             check_origin_dest_empty_adjacency(ply.actor_loc)
-
-            if self.piece_at(ply.actor_loc).insect != Insect.Pillbug:
-                check_mosquito_adjacent_to_pillbug(ply.actor_loc)
+            
             if not self.one_hive_rule(ply.origin):
                 raise IllegalMove(Violation.One_Hive_Rule)
             
             return ply
+        elif ply.rule == Rule.Leech_Relocate:
+            assert(isinstance(ply.origin, tuple))
+            assert(isinstance(ply.dest, tuple))
+            assert(isinstance(ply.actor_loc, tuple) and ply.actor_loc)
+            assert(isinstance(ply.leech_from, tuple) and ply.leech_from)
+            
+            ply.tile = self.piece_at(ply.actor_loc)
+            
+            if self.piece_at(ply.leech_from).insect != Insect.Pillbug:
+                raise IllegalMove(Violation.Unavailable_Action)
+            
+            check_origin_dest_empty_adjacency(ply.actor_loc)
+            
+            return ply
+        else:
+            raise RuntimeError
         
     def valid_moves(self, coords):
         def adjacent_to_something(ignored_origin, dest):

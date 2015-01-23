@@ -424,19 +424,11 @@ class TestHive(unittest.TestCase):
         board.place(hive.Tile(hive.Color.Black, hive.Insect.Spider), (-1,3))
 
         with self.assertRaises(hive.IllegalMove) as e:
-            board.perform(hive.Relocation((-1,0), (5,5), (0,-1)))
-        self.assertEqual(e.exception.violation, hive.Violation.Pillbug_Adjacent)
-
-        with self.assertRaises(hive.IllegalMove) as e:
-            board.perform(hive.Relocation((-1,3), (1,2), (0,3), None))
+            board.perform(hive.Relocation((-1,3), (1,2), (0,3), (0,2)))
         self.assertEqual(e.exception.violation, hive.Violation.Unavailable_Action)
-        
-        board.perform(hive.Relocation((-1,0), (1,-1), (0,-1), None))
-        self.assertEqual(board._pieces[(1,-1)][0], pb)
 
-        with self.assertRaises(hive.IllegalMove) as e:
-            board.perform(hive.Relocation((0,0), (-1,0), (0,-1), None))
-        self.assertEqual(e.exception.violation, hive.Violation.One_Hive_Rule)
+        board.perform(hive.Relocation((-1,0), (1,-1), (0,-1), (-1,0)))
+        self.assertEqual(board._pieces[(1,-1)][0], pb)
         
     def test_mosquito_leech_move(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
