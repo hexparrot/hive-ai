@@ -433,6 +433,10 @@ class TestHive(unittest.TestCase):
 
         board.perform(hive.Relocation((-1,0), (1,-1), (0,-1), (-1,0)))
         self.assertEqual(board._pieces[(1,-1)][0], pb)
+
+        with self.assertRaises(hive.IllegalMove) as e:
+            board.perform(hive.Relocation((-1,3), (1,2), (0,3), (1,-1)))
+        self.assertEqual(e.exception.violation, hive.Violation.Mosquito_Adjacent)
         
     def test_mosquito_leech_move(self):
         board = hive.HiveBoard(queen_opening_allowed=True)

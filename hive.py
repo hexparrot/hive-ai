@@ -110,6 +110,7 @@ class Violation(Enum):
     Freedom_of_Movement = 'Piece unable to slide physically through this path'
     One_Hive_Rule = 'Movement/placement may not split hive into separate pieces, even in-transit'
     Pillbug_Adjacent = 'Origin and dest must both be adjacent to pillbug'
+    Mosquito_Adjacent = 'Mosquito must both be adjacent to pillbug'
     Pillbug_Cannot_Touch_Stacks = 'Pillbugs may not grab from or place onto stacks'
     Unavailable_Action = 'The active tile does not have access to this action'
 
@@ -283,7 +284,6 @@ class HiveBoard(object):
                 len(self.stack_at(ply.origin)) > 1:
                 raise IllegalMove(Violation.Pillbug_Cannot_Touch_Stacks)
 
-
         if ply.rule == Rule.Place:
             assert(isinstance(ply.tile, Tile))
             assert(isinstance(ply.dest, tuple))
@@ -351,6 +351,8 @@ class HiveBoard(object):
             
             if self.piece_at(ply.leech_from).insect != Insect.Pillbug:
                 raise IllegalMove(Violation.Unavailable_Action)
+            elif ply.leech_from not in self.hex_neighbors(self.tile_orientation, ply.actor_loc):
+                raise IllegalMove(Violation.Mosquito_Adjacent)
             
             check_origin_dest_empty_adjacency(ply.actor_loc)
             
