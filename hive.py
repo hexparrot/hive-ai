@@ -360,6 +360,10 @@ class HiveBoard(object):
             
             return ply
         elif ply.rule == Rule.Leech_Move:
+            assert(isinstance(ply.origin, tuple))
+            assert(isinstance(ply.dest, tuple))
+            assert(isinstance(ply.leech_from, tuple) and ply.leech_from)
+            
             if ply.dest in set(self.valid_moves(ply.origin, self.piece_at(ply.leech_from).insect)):
                 return ply
             #else:
