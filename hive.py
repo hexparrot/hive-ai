@@ -591,6 +591,35 @@ class HiveBoard(object):
         return checked == set(all_pieces)
 
     @property
+    def winner(self):
+        wq, bq = None, None
+        
+        for coords, stack in self._pieces.items():
+            if Tile(Color.White, Insect.Queen) in stack:
+                wq = coords 
+            elif Tile(Color.Black, Insect.Queen) in stack:
+                bq = coords
+        
+        try:
+            white_surrounded = all(p in self._pieces for p in self.hex_neighbors(self.tile_orientation, wq))
+        except TypeError:
+            white_surrounded = False
+        
+        try:
+            black_surrounded = all(p in self._pieces for p in self.hex_neighbors(self.tile_orientation, bq))
+        except TypeError:
+            black_surrounded = False
+        
+        if white_surrounded and black_surrounded:
+            return False
+        elif white_surrounded:
+            return Color.Black
+        elif black_surrounded:
+            return Color.White     
+        else:
+            return None
+        
+    @property
     def ply_number(self):
         return len(self._log)
     

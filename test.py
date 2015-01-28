@@ -582,6 +582,39 @@ class TestHive(unittest.TestCase):
             board.perform(p3)
             
         self.assertEqual(e.exception.violation, hive.Violation.One_Hive_Rule)
+        
+    def test_winner_found(self):
+        board = hive.HiveBoard()
+        self.assertIsNone(board.winner)
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ',
+            (0,-1): 'wB',
+            (0,-2): 'bM'  
+        }
+        
+        board.quick_setup(pieces)
+        self.assertIsNone(board.winner)
+        
+        pieces = {
+            (1,0): 'wA',
+            (1,1): 'bA',
+            (0,2): 'wB',
+            (-1,2): 'bB',
+            (-1,1): 'bG'
+        }
+        
+        board.quick_setup(pieces)
+        self.assertEqual(board.winner, hive.Color.White)
+        
+        pieces = {
+            (1,-1): 'wA',
+            (-1,0): 'bA'
+        }
+        
+        board.quick_setup(pieces)
+        self.assertFalse(board.winner)
                          
     def test_get_direction(self):
         self.assertEqual(hive.HiveBoard.get_direction((0,0), (-1,0), hive.Flat_Directions), hive.Flat_Directions.NW)
