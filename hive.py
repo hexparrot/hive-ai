@@ -566,6 +566,26 @@ class HiveBoard(object):
             current = came_from[current]
             path.append(current)
         return list(reversed(path))
+        
+    def valid_placements(self, color):
+        def adjacent_to_opponent(friendly_color, coord):
+            for c in self.hex_neighbors(self.tile_orientation, coord):
+                if c in self._pieces and self.piece_at(c).color != friendly_color:
+                    return True
+            return False
+        
+        valid = set()
+        checked = set()
+        
+        for coords in self._pieces.keys():
+            for n in self.hex_neighbors(self.tile_orientation, coords):
+                if n not in checked and \
+                   n not in self._pieces and \
+                   not adjacent_to_opponent(color, n):
+                    valid.add(n)
+                checked.add(n)
+                
+        return valid
 
     def one_hive_rule(self, ignored_coord=None):
         from queue import Queue
