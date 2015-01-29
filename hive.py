@@ -511,6 +511,14 @@ class HiveBoard(object):
         thanks amit patel
         http://www.redblobgames.com/pathfinding/a-star/introduction.html
         '''
+        def freedom_of_movement_violated(start, end):
+            blockers = self.FLAT_BLOCKING if self.tile_orientation == Flat_Directions else self.POINTED_BLOCKING
+            direction = self.get_direction(start, end, self.tile_orientation)
+            
+            if self.go_direction(start, blockers[direction][0]) in self._pieces and \
+                self.go_direction(start, blockers[direction][1]) in self._pieces:
+                return True
+
         from queue import Queue
         
         frontier = Queue()
@@ -539,7 +547,8 @@ class HiveBoard(object):
             for n in self.hex_neighbors(self.tile_orientation, current):
                 if n not in came_from:
                     if insect in [Insect.Spider, Insect.Ant, Insect.Queen, Insect.Pillbug]:                        
-                        if n not in self._pieces:
+                        if n not in self._pieces and \
+                            not freedom_of_movement_violated(current, n):
                             frontier.put(n)
                             came_from[n] = current
                     elif insect == Insect.Beetle:
@@ -566,7 +575,7 @@ class HiveBoard(object):
         try:
             came_from[current]
         except KeyError:
-            raise RuntimeError('no valid path from', origin, dest)
+            raise IllegalMove(Violation.Freedom_of_Movement)
         
         while current != origin:
             current = came_from[current]

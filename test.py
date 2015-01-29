@@ -530,8 +530,9 @@ class TestHive(unittest.TestCase):
         
         board.quick_setup(pieces)
         
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(hive.IllegalMove) as e:
             board.valid_path((0,-1), (1,0))
+        self.assertEqual(e.exception.violation, hive.Violation.Freedom_of_Movement)
             
     def test_invalid_paths_physical_slide(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
@@ -546,12 +547,10 @@ class TestHive(unittest.TestCase):
         }
         
         board.quick_setup(pieces)
-        print(board)
-        
-        with self.assertRaises(RuntimeError):
+
+        with self.assertRaises(hive.IllegalMove) as e:
             board.valid_path((0,-1), (1,0))
-            
-    
+        self.assertEqual(e.exception.violation, hive.Violation.Freedom_of_Movement)
 
     def test_valid_placements(self):
         board = hive.HiveBoard()
@@ -578,7 +577,7 @@ class TestHive(unittest.TestCase):
         board.place(hive.Tile(hive.Color.Black, hive.Insect.Spider), (1,1))
         board.place(hive.Tile(hive.Color.White, hive.Insect.Ant), (2,-1))
         board.place(hive.Tile(hive.Color.Black, hive.Insect.Ant), (0,2))
-        
+
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Movement((0,2), (1,0)))
         self.assertEqual(e.exception.violation, hive.Violation.Freedom_of_Movement)
