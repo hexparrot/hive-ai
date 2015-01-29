@@ -637,6 +637,22 @@ class TestHive(unittest.TestCase):
             
         self.assertEqual(e.exception.violation, hive.Violation.One_Hive_Rule)
         
+    def test_free_pieces(self):
+        board = hive.HiveBoard()
+        self.assertIsNone(board.winner)
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ',
+            (0,-1): 'wB',
+            (0,2): 'bM'  
+        }
+        
+        board.quick_setup(pieces)
+        
+        self.assertEqual(board.free_pieces(hive.Color.White), set([(0,-1)]))
+        self.assertEqual(board.free_pieces(hive.Color.Black), set([(0,2)]))
+        
     def test_winner_found(self):
         board = hive.HiveBoard()
         self.assertIsNone(board.winner)

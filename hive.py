@@ -625,6 +625,16 @@ class HiveBoard(object):
 
         return checked == set(all_pieces)
 
+    def free_pieces(self, color):
+        free = set()
+        
+        for coords in self._pieces:
+            if self.piece_at(coords).color == color:
+                if self.one_hive_rule(coords):
+                    free.add(coords)
+        
+        return free
+
     @property
     def winner(self):
         white_surrounded, black_surrounded = False, False
