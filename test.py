@@ -532,6 +532,26 @@ class TestHive(unittest.TestCase):
         
         with self.assertRaises(RuntimeError):
             board.valid_path((0,-1), (1,0))
+            
+    def test_invalid_paths_physical_slide(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ',
+            (1,-1): 'wB',
+            (1,1): 'bM',
+            (2,0): 'bG',
+            (0,-1): 'wA'
+        }
+        
+        board.quick_setup(pieces)
+        print(board)
+        
+        with self.assertRaises(RuntimeError):
+            board.valid_path((0,-1), (1,0))
+            
+    
 
     def test_valid_placements(self):
         board = hive.HiveBoard()

@@ -116,6 +116,24 @@ class Violation(Enum):
     May_Not_Place_On_Other_Pieces = 'Pieces may not initially be placed on other pieces'
 
 class HiveBoard(object):
+    FLAT_BLOCKING = {
+        Flat_Directions.N: (Flat_Directions.NW, Flat_Directions.NE),
+        Flat_Directions.NE: (Flat_Directions.N, Flat_Directions.SE),
+        Flat_Directions.SE: (Flat_Directions.NE, Flat_Directions.S),
+        Flat_Directions.S: (Flat_Directions.SW, Flat_Directions.SE),
+        Flat_Directions.SW: (Flat_Directions.NW, Flat_Directions.S),
+        Flat_Directions.NW: (Flat_Directions.SW, Flat_Directions.N)
+    }
+    
+    POINTED_BLOCKING = {
+        Pointed_Directions.NE: (Pointed_Directions.NW, Pointed_Directions.E),
+        Pointed_Directions.E: (Pointed_Directions.NE, Pointed_Directions.SE),
+        Pointed_Directions.SE: (Pointed_Directions.E, Pointed_Directions.SW),
+        Pointed_Directions.SW: (Pointed_Directions.W, Pointed_Directions.SE),
+        Pointed_Directions.W: (Pointed_Directions.NW, Pointed_Directions.SW),
+        Pointed_Directions.NW: (Pointed_Directions.NE, Pointed_Directions.W)
+    }
+        
     def __init__(self,
                  tile_orientation=Flat_Directions,
                  queen_opening_allowed=False):
@@ -178,25 +196,7 @@ class HiveBoard(object):
     
             self._log.append(ply)
     
-    def validate(self, ply):  
-        Flat_Blocking = {
-            Flat_Directions.N: (Flat_Directions.NW, Flat_Directions.NE),
-            Flat_Directions.NE: (Flat_Directions.N, Flat_Directions.SE),
-            Flat_Directions.SE: (Flat_Directions.NE, Flat_Directions.S),
-            Flat_Directions.S: (Flat_Directions.SW, Flat_Directions.SE),
-            Flat_Directions.SW: (Flat_Directions.NW, Flat_Directions.S),
-            Flat_Directions.NW: (Flat_Directions.SW, Flat_Directions.N)
-        }
-        
-        Pointed_Blocking = {
-            Pointed_Directions.NE: (Pointed_Directions.NW, Pointed_Directions.E),
-            Pointed_Directions.E: (Pointed_Directions.NE, Pointed_Directions.SE),
-            Pointed_Directions.SE: (Pointed_Directions.E, Pointed_Directions.SW),
-            Pointed_Directions.SW: (Pointed_Directions.W, Pointed_Directions.SE),
-            Pointed_Directions.W: (Pointed_Directions.NW, Pointed_Directions.SW),
-            Pointed_Directions.NW: (Pointed_Directions.NE, Pointed_Directions.W)
-        }
-        
+    def validate(self, ply):          
         def queen_placed(color):
             q = Tile(color, Insect.Queen)
             for stack in self._pieces.values():
@@ -244,7 +244,7 @@ class HiveBoard(object):
                 return
 
             path_copy = path[:]
-            blockers = Flat_Blocking if self.tile_orientation == Flat_Directions else Pointed_Blocking
+            blockers = self.FLAT_BLOCKING if self.tile_orientation == Flat_Directions else self.POINTED_BLOCKING
             
             while path_copy:
                 try:
@@ -268,7 +268,7 @@ class HiveBoard(object):
             if self.piece_at(start).insect != Insect.Beetle:
                 return
                 
-            blockers = Flat_Blocking if self.tile_orientation == Flat_Directions else Pointed_Blocking
+            blockers = self.FLAT_BLOCKING if self.tile_orientation == Flat_Directions else self.POINTED_BLOCKING
             direction = self.get_direction(start, end, self.tile_orientation)
             
             gate_1 = self.go_direction(start, blockers[direction][0])
