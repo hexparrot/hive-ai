@@ -514,6 +514,24 @@ class TestHive(unittest.TestCase):
                          [(0,3), (1,2), (2,1), (2,0), (1,0)])
         self.assertEqual(board.valid_path((0,3), (-1,0)),
                          [(0,3), (-1,3), (-1,2), (-1,1), (-1,0)])
+    
+    def test_invalid_paths(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ',
+            (1,-1): 'wB',
+            (1,1): 'bM',
+            (2,-1): 'wG',
+            (2,0): 'bG',
+            (0,-1): 'wA'
+        }
+        
+        board.quick_setup(pieces)
+        
+        with self.assertRaises(RuntimeError):
+            board.valid_path((0,-1), (1,0))
 
     def test_valid_placements(self):
         board = hive.HiveBoard()

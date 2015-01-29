@@ -562,6 +562,12 @@ class HiveBoard(object):
 
         current = dest
         path = [current]
+        
+        try:
+            came_from[current]
+        except KeyError:
+            raise RuntimeError('no valid path from', origin, dest)
+        
         while current != origin:
             current = came_from[current]
             path.append(current)
