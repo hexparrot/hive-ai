@@ -17,6 +17,11 @@ class Placement(Ply):
     def __init__(self, tile, dest):
         super().__init__(Rule.Place, tile)
         self.dest = dest
+    
+    def __str__(self):
+        return 'Placing {0} {1} at {2}'.format(self.tile.color.name,
+                                               self.tile.insect.name,
+                                               self.dest) 
 
 class Movement(Ply):
     def __init__(self, origin, dest, leech_from=None):
@@ -28,6 +33,13 @@ class Movement(Ply):
             
         self.origin = origin
         self.dest = dest
+    
+    def __str__(self):
+        retval = 'Movement from {0} to {1}'.format(self.origin, self.dest)
+        if self.leech_from:
+            retval += ' leeching power from {0}'.format(self.leech_from)
+        
+        return retval
 
 class Relocation(Ply):
     def __init__(self, origin, dest, actor_loc, leech_from=None):
@@ -40,6 +52,15 @@ class Relocation(Ply):
         self.origin = origin
         self.dest = dest
         self.actor_loc = actor_loc
+    
+    def __str__(self):
+        retval = 'Movement from {0} to {1}'.format(self.origin, self.dest)
+        retval += ' via {0}'.format(self.actor_loc)
+        
+        if self.leech_from:
+            retval += ' leeching power from {0}'.format(self.leech_from)
+        
+        return retval
 
 class Tile(object):
     def __init__(self, color, insect):
@@ -51,6 +72,9 @@ class Tile(object):
     
     def __ne__(self, other):
         return not self.__eq__(other)
+    
+    def __str__(self):
+        return '{0} {1}'.format(self.color.name, self.insect.name)
     
     @property
     def color(self):
