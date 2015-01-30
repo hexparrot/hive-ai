@@ -634,6 +634,20 @@ class HiveBoard(object):
                     free.add(coords)
         
         return free
+    
+    def can_act(self, color):
+        if len(self._pieces) == 0:
+            return True
+        elif len(self._pieces) == 1:
+            if self.piece_at(list(self._pieces.keys())[0]).color == color:
+                return False
+            else:
+                return True
+        else:
+            if self.free_pieces(color) or self.valid_placements(color):
+                return True
+            else:
+                return False
 
     @property
     def winner(self):

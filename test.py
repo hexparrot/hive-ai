@@ -685,6 +685,21 @@ class TestHive(unittest.TestCase):
         
         board.quick_setup(pieces)
         self.assertFalse(board.winner)
+    
+    def test_can_act(self):
+        board = hive.HiveBoard()
+        self.assertTrue(board.can_act(hive.Color.White))
+        self.assertTrue(board.can_act(hive.Color.Black))
+        
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        
+        self.assertFalse(board.can_act(hive.Color.White))
+        self.assertTrue(board.can_act(hive.Color.Black))
+        
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        
+        self.assertTrue(board.can_act(hive.Color.White))
+        self.assertTrue(board.can_act(hive.Color.Black))
                          
     def test_get_direction(self):
         self.assertEqual(hive.HiveBoard.get_direction((0,0), (-1,0), hive.Flat_Directions), hive.Flat_Directions.NW)
