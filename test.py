@@ -637,6 +637,22 @@ class TestHive(unittest.TestCase):
             
         self.assertEqual(e.exception.violation, hive.Violation.One_Hive_Rule)
         
+    def test_free_pieces(self):
+        board = hive.HiveBoard()
+        self.assertIsNone(board.winner)
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ',
+            (0,-1): 'wB',
+            (0,2): 'bM'  
+        }
+        
+        board.quick_setup(pieces)
+        
+        self.assertEqual(board.free_pieces(hive.Color.White), set([(0,-1)]))
+        self.assertEqual(board.free_pieces(hive.Color.Black), set([(0,2)]))
+        
     def test_winner_found(self):
         board = hive.HiveBoard()
         self.assertIsNone(board.winner)
@@ -669,6 +685,21 @@ class TestHive(unittest.TestCase):
         
         board.quick_setup(pieces)
         self.assertFalse(board.winner)
+    
+    def test_can_act(self):
+        board = hive.HiveBoard()
+        self.assertTrue(board.can_act(hive.Color.White))
+        self.assertTrue(board.can_act(hive.Color.Black))
+        
+        board.place(hive.Tile(hive.Color.White, hive.Insect.Queen), (0,0))
+        
+        self.assertFalse(board.can_act(hive.Color.White))
+        self.assertTrue(board.can_act(hive.Color.Black))
+        
+        board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
+        
+        self.assertTrue(board.can_act(hive.Color.White))
+        self.assertTrue(board.can_act(hive.Color.Black))
                          
     def test_get_direction(self):
         self.assertEqual(hive.HiveBoard.get_direction((0,0), (-1,0), hive.Flat_Directions), hive.Flat_Directions.NW)
