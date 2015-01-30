@@ -14,7 +14,7 @@ class GamePieces(object):
         Insect.Ant: 3,
         Insect.Beetle: 1,
         Insect.Grasshopper: 2,
-        Insect.Ladybug: 1,
+        Insect.Ladybug: 0,
         Insect.Mosquito: 0,
         Insect.Pillbug: 0,
         Insect.Spider: 2
@@ -51,15 +51,36 @@ if __name__ == '__main__':
         Color.Black: 'grab'
         }
     
-    for player_color in cycle([Color.White, Color.Black]):
-        try:
-            grabbed = gp.grab_random(player_color)
-        except IndexError:
-            print('placing over')
-            break
-        else:
-            new_loc = choice(list(board.valid_placements(player_color)))
-            board.perform(Placement(grabbed, new_loc))
+    cycler = cycle([Color.White, Color.Black])
+    player_color = next(cycler)
+        
+    while board.winner is None:
+        if action[player_color] == 'grab':
+            try:
+                grabbed = gp.grab_random(player_color)
+            except IndexError:
+                print('placing over')
+                action[player_color] = 'move'
+                player_color = next(cycler)
+            else:
+                new_loc = choice(list(board.valid_placements(player_color)))
+                board.perform(Placement(grabbed, new_loc))
+        elif action[player_color] == 'move':
+            try:
+                for c in board._pieces:
+                    p = board.piece_at(c)
+                    v = list(board.valid_moves(c))
+                    print(p,v,c)
+                    if p.color == player_color and len(v):
+                        board.perform(Movement(c, choice(v)))
+                        print('performed', p,v,c)
+                        player_color = next(cycler)
+                else:
+                    player_color = next(cycler)
+            except IllegalMove as e:
+                print(e)
+                break
+            
             
     print(board)
     
