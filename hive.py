@@ -45,13 +45,13 @@ class Relocation(Ply):
     def __init__(self, origin, dest, actor_loc, leech_from=None):
         if leech_from:
             super().__init__(Rule.Leech_Relocate, None)
-            self.leech_from = leech_from
         else:
             super().__init__(Rule.Relocate, None)
         
         self.origin = origin
         self.dest = dest
         self.actor_loc = actor_loc
+        self.leech_from = leech_from
     
     def __str__(self):
         retval = 'Movement from {0} to {1}'.format(self.origin, self.dest)
@@ -138,6 +138,7 @@ class Violation(Enum):
     Pillbug_Cannot_Touch_Stacks = 'Pillbugs may not grab from or place onto stacks'
     Unavailable_Action = 'The active tile does not have access to this action'
     May_Not_Place_On_Other_Pieces = 'Pieces may not initially be placed on other pieces'
+    Cannot_Jump_Gaps = 'Pieces may not temporarily be separated from the hive'
 
 class HiveBoard(object):
     FLAT_BLOCKING = {
@@ -258,6 +259,11 @@ class HiveBoard(object):
                                    Insect.Pillbug] and \
                 self.hex_distance(ply.origin, ply.dest) != 1:
                 raise IllegalMove(Violation.Distance_Must_Be_Exactly_One)
+        
+        def check_correct_distance_for_spiders(start, end):
+            if ply.tile.insect == Insect.Spider and \
+                self.hex_distance(start, end) != 3:
+                raise IllegalMove(Violation.Invalid_Distance_Attempted)
 
         def check_insect_moved():
             if self.hex_distance(ply.origin, ply.dest) == 0:
@@ -309,6 +315,20 @@ class HiveBoard(object):
             elif ply.dest in self._pieces or \
                 len(self.stack_at(ply.origin)) > 1:
                 raise IllegalMove(Violation.Pillbug_Cannot_Touch_Stacks)
+                
+        def jumping_gap(start, end):
+            if self.piece_at(start).insect not in [Insect.Beetle, Insect.Queen]:
+                return
+            elif end in self._pieces:
+                return #if climbing, not jumping gap
+            elif len(self.stack_at(start)) > 1:
+                return #if climbing down, gap irrelevant
+                
+            direction = self.get_direction(start, end, self.tile_orientation)            
+            helpers = self.FLAT_BLOCKING if self.tile_orientation == Flat_Directions else self.POINTED_BLOCKING
+            if self.go_direction(start, helpers[direction][0]) not in self._pieces and \
+               self.go_direction(start, helpers[direction][1]) not in self._pieces:
+                raise IllegalMove(Violation.Cannot_Jump_Gaps)
 
         if ply.rule == Rule.Place:
             assert(isinstance(ply.tile, Tile))
@@ -339,17 +359,19 @@ class HiveBoard(object):
 
             if not queen_placed(ply.tile.color):
                 raise IllegalMove(Violation.No_Movement_Before_Queen_Bee_Placed)
+            if not self.one_hive_rule(ply.origin):
+                raise IllegalMove(Violation.One_Hive_Rule)
             
             check_insect_moved()
             check_climbing_permitted()
             check_correct_distance_for_single_hex_insects()
+            check_correct_distance_for_spiders(ply.origin, ply.dest)
             
             freedom_of_movement(self.valid_path(ply.origin, ply.dest))
             beetle_gate_freedom_of_moment(ply.origin, ply.dest)
+            
+            jumping_gap(ply.origin, ply.dest)
 
-            if not self.one_hive_rule(ply.origin):
-                raise IllegalMove(Violation.One_Hive_Rule)
-                
             return ply
         elif ply.rule == Rule.Relocate:
             assert(isinstance(ply.origin, tuple))
