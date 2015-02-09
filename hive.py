@@ -138,6 +138,7 @@ class Violation(Enum):
     Pillbug_Cannot_Touch_Stacks = 'Pillbugs may not grab from or place onto stacks'
     Unavailable_Action = 'The active tile does not have access to this action'
     May_Not_Place_On_Other_Pieces = 'Pieces may not initially be placed on other pieces'
+    Cannot_Jump_Gaps = 'Pieces may not temporarily be separated from the hive'
 
 class HiveBoard(object):
     FLAT_BLOCKING = {
@@ -309,6 +310,20 @@ class HiveBoard(object):
             elif ply.dest in self._pieces or \
                 len(self.stack_at(ply.origin)) > 1:
                 raise IllegalMove(Violation.Pillbug_Cannot_Touch_Stacks)
+                
+        def jumping_gap(start, end):
+            if self.piece_at(start).insect != Insect.Beetle:
+                return
+            elif end in self._pieces:
+                return #if climbing, not jumping gap
+            elif len(self.stack_at(start)) > 1:
+                return #if climbing down, gap irrelevant
+                
+            direction = self.get_direction(start, end, self.tile_orientation)            
+            helpers = self.FLAT_BLOCKING if self.tile_orientation == Flat_Directions else self.POINTED_BLOCKING
+            if self.go_direction(start, helpers[direction][0]) not in self._pieces and \
+               self.go_direction(start, helpers[direction][1]) not in self._pieces:
+                raise IllegalMove(Violation.Cannot_Jump_Gaps)
 
         if ply.rule == Rule.Place:
             assert(isinstance(ply.tile, Tile))
@@ -346,6 +361,8 @@ class HiveBoard(object):
             
             freedom_of_movement(self.valid_path(ply.origin, ply.dest))
             beetle_gate_freedom_of_moment(ply.origin, ply.dest)
+            
+            jumping_gap(ply.origin, ply.dest)
 
             if not self.one_hive_rule(ply.origin):
                 raise IllegalMove(Violation.One_Hive_Rule)

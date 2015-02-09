@@ -290,7 +290,7 @@ class TestHive(unittest.TestCase):
         board.place(hive.Tile(hive.Color.Black, hive.Insect.Queen), (0,1))
         board.place(hive.Tile(hive.Color.White, hive.Insect.Beetle), (-1,0))
         board.place(hive.Tile(hive.Color.Black, hive.Insect.Beetle), (0,2))
-        
+
         self.assertSetEqual(set(board.valid_moves( (-1,0) )),
                             set([(0,-1), (0,0), (-1,1)]))
                             
@@ -551,6 +551,25 @@ class TestHive(unittest.TestCase):
         with self.assertRaises(hive.IllegalMove) as e:
             board.valid_path((0,-1), (1,0))
         self.assertEqual(e.exception.violation, hive.Violation.Freedom_of_Movement)
+    
+    def test_beetle_jump_gaps(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ',
+            (1,-1): 'wB',
+            (1,1): 'bM',
+            (2,0): 'bB',
+            (0,-1): 'wA'
+        }
+        
+        board.quick_setup(pieces)
+        
+        with self.assertRaises(hive.IllegalMove) as e:
+            board.perform(hive.Movement((2,0), (2,-1)))
+        
+        self.assertEqual(e.exception.violation, hive.Violation.Cannot_Jump_Gaps)
 
     def test_valid_placements(self):
         board = hive.HiveBoard()
