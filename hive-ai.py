@@ -67,7 +67,8 @@ if __name__ == '__main__':
                 board.perform(Placement(grabbed, new_loc))
         elif action[player_color] == 'move':
             move_made = False
-            current_positions = frozenset(board._pieces.keys())
+            current_positions = list(board._pieces.keys())
+            shuffle(current_positions)
             
             for actor_coord in current_positions:
                 if move_made:
