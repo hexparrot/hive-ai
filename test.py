@@ -533,6 +533,23 @@ class TestHive(unittest.TestCase):
         with self.assertRaises(hive.IllegalMove) as e:
             board.valid_path((0,-1), (1,0))
         self.assertEqual(e.exception.violation, hive.Violation.Freedom_of_Movement)
+        
+    def test_spider_three_space_limit(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ',
+            (-1,-1): 'bS',
+            (0,-1): 'wA',
+            (0,2): 'bA'
+        }
+        
+        board.quick_setup(pieces)
+        
+        with self.assertRaises(hive.IllegalMove) as e:
+            board.perform(hive.Movement((-1,-1), (-1,3)))
+        self.assertEqual(e.exception.violation, hive.Violation.Invalid_Distance_Attempted)
             
     def test_invalid_paths_physical_slide(self):
         board = hive.HiveBoard(queen_opening_allowed=True)

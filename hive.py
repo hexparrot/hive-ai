@@ -259,6 +259,11 @@ class HiveBoard(object):
                                    Insect.Pillbug] and \
                 self.hex_distance(ply.origin, ply.dest) != 1:
                 raise IllegalMove(Violation.Distance_Must_Be_Exactly_One)
+        
+        def check_correct_distance_for_spiders(start, end):
+            if ply.tile.insect == Insect.Spider and \
+                self.hex_distance(start, end) != 3:
+                raise IllegalMove(Violation.Invalid_Distance_Attempted)
 
         def check_insect_moved():
             if self.hex_distance(ply.origin, ply.dest) == 0:
@@ -354,19 +359,19 @@ class HiveBoard(object):
 
             if not queen_placed(ply.tile.color):
                 raise IllegalMove(Violation.No_Movement_Before_Queen_Bee_Placed)
+            if not self.one_hive_rule(ply.origin):
+                raise IllegalMove(Violation.One_Hive_Rule)
             
             check_insect_moved()
             check_climbing_permitted()
             check_correct_distance_for_single_hex_insects()
+            check_correct_distance_for_spiders(ply.origin, ply.dest)
             
             freedom_of_movement(self.valid_path(ply.origin, ply.dest))
             beetle_gate_freedom_of_moment(ply.origin, ply.dest)
             
             jumping_gap(ply.origin, ply.dest)
 
-            if not self.one_hive_rule(ply.origin):
-                raise IllegalMove(Violation.One_Hive_Rule)
-                
             return ply
         elif ply.rule == Rule.Relocate:
             assert(isinstance(ply.origin, tuple))
