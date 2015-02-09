@@ -45,13 +45,13 @@ class Relocation(Ply):
     def __init__(self, origin, dest, actor_loc, leech_from=None):
         if leech_from:
             super().__init__(Rule.Leech_Relocate, None)
-            self.leech_from = leech_from
         else:
             super().__init__(Rule.Relocate, None)
         
         self.origin = origin
         self.dest = dest
         self.actor_loc = actor_loc
+        self.leech_from = leech_from
     
     def __str__(self):
         retval = 'Movement from {0} to {1}'.format(self.origin, self.dest)
