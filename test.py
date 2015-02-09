@@ -570,6 +570,25 @@ class TestHive(unittest.TestCase):
             board.perform(hive.Movement((2,0), (2,-1)))
         
         self.assertEqual(e.exception.violation, hive.Violation.Cannot_Jump_Gaps)
+    
+    def test_queen_jump_gaps(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ',
+            (1,-1): 'wB',
+            (2,-1): 'bM',
+            (2,0): 'bB',
+            (0,-1): 'wA'
+        }
+        
+        board.quick_setup(pieces)
+
+        with self.assertRaises(hive.IllegalMove) as e:
+            board.perform(hive.Movement((0,1), (1,1)))
+        
+        self.assertEqual(e.exception.violation, hive.Violation.Cannot_Jump_Gaps)
 
     def test_valid_placements(self):
         board = hive.HiveBoard()

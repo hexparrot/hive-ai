@@ -312,7 +312,7 @@ class HiveBoard(object):
                 raise IllegalMove(Violation.Pillbug_Cannot_Touch_Stacks)
                 
         def jumping_gap(start, end):
-            if self.piece_at(start).insect != Insect.Beetle:
+            if self.piece_at(start).insect not in [Insect.Beetle, Insect.Queen]:
                 return
             elif end in self._pieces:
                 return #if climbing, not jumping gap
