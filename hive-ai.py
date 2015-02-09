@@ -66,8 +66,12 @@ if __name__ == '__main__':
                 new_loc = choice(list(board.valid_placements(player_color)))
                 board.perform(Placement(grabbed, new_loc))
         elif action[player_color] == 'move':
+            move_made = False
             current_positions = frozenset(board._pieces.keys())
+            
             for actor_coord in current_positions:
+                if move_made:
+                    continue
                 p = board.piece_at(actor_coord)
                 if p.color == player_color:
                     vm_set = list(board.valid_moves(actor_coord))
@@ -85,9 +89,9 @@ if __name__ == '__main__':
                             continue
                         else:
                             print('performed:', p, actor_coord, considered_move)
-                            player_color = next(cycler)
+                            move_made = True
+                            #player_color = next(cycler)
                             break
-
             else:
                 player_color = next(cycler)
 
