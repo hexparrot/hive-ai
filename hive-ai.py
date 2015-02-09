@@ -55,19 +55,23 @@ if __name__ == '__main__':
     player_color = next(cycler)
         
     while board.winner is None:
-        if action[player_color] == 'grab':
+        if not board.can_act(player_color):
+            player_color = next(cycler)
+        elif action[player_color] == 'grab':
             try:
                 grabbed = gp.grab_random(player_color)
             except IndexError:
                 print('placing over')
                 action[player_color] = 'move'
-                player_color = next(cycler)
             else:
                 new_loc = choice(list(board.valid_placements(player_color)))
-                board.perform(Placement(grabbed, new_loc))
+                placement_action = Placement(grabbed, new_loc)
+                board.perform(placement_action)
+                print(placement_action)
+                player_color = next(cycler)
         elif action[player_color] == 'move':
             move_made = False
-            current_positions = list(board._pieces.keys())
+            current_positions = list(board.free_pieces(player_color))
             shuffle(current_positions)
             
             for actor_coord in current_positions:
@@ -93,8 +97,7 @@ if __name__ == '__main__':
                             move_made = True
                             #player_color = next(cycler)
                             break
-            else:
-                pass #getting here means the player literally had no available moves
+
             player_color = next(cycler)
 
             
