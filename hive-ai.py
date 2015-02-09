@@ -61,7 +61,7 @@ if __name__ == '__main__':
             try:
                 grabbed = gp.grab_random(player_color)
             except IndexError:
-                print('placing over')
+                print('%s ALL PIECES PLACED' % (str(player_color).ljust(20)))
                 action[player_color] = 'move'
             else:
                 new_loc = choice(list(board.valid_placements(player_color)))
@@ -93,7 +93,7 @@ if __name__ == '__main__':
                             #print(e, board._pieces[actor_coord])
                             continue
                         else:
-                            print('performed:', p, actor_coord, considered_move)
+                            print('%s %s' % (str(p).ljust(20), considered_ply))
                             move_made = True
                             #player_color = next(cycler)
                             break
