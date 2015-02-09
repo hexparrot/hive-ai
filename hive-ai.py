@@ -72,7 +72,7 @@ if __name__ == '__main__':
             
             for actor_coord in current_positions:
                 if move_made:
-                    continue
+                    break
                 p = board.piece_at(actor_coord)
                 if p.color == player_color:
                     vm_set = list(board.valid_moves(actor_coord))
@@ -94,7 +94,8 @@ if __name__ == '__main__':
                             #player_color = next(cycler)
                             break
             else:
-                player_color = next(cycler)
+                pass #getting here means the player literally had no available moves
+            player_color = next(cycler)
 
             
     print('ended')    
