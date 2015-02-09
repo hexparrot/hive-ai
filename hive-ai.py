@@ -44,7 +44,7 @@ if __name__ == '__main__':
     board.perform(Placement(gp.grab(Color.Black, Insect.Queen), (0,1)))
 
     from itertools import cycle
-    from random import choice
+    from random import choice, shuffle
     
     action = {
         Color.White: 'grab',
@@ -66,21 +66,32 @@ if __name__ == '__main__':
                 new_loc = choice(list(board.valid_placements(player_color)))
                 board.perform(Placement(grabbed, new_loc))
         elif action[player_color] == 'move':
-            try:
-                for c in board._pieces:
-                    p = board.piece_at(c)
-                    v = list(board.valid_moves(c))
-                    print(p,v,c)
-                    if p.color == player_color and len(v):
-                        board.perform(Movement(c, choice(v)))
-                        print('performed', p,v,c)
-                        player_color = next(cycler)
-                else:
-                    player_color = next(cycler)
-            except IllegalMove as e:
-                print(e)
-                break
+            current_positions = frozenset(board._pieces.keys())
+            for actor_coord in current_positions:
+                p = board.piece_at(actor_coord)
+                if p.color == player_color:
+                    vm_set = list(board.valid_moves(actor_coord))
+                    shuffle(vm_set)
+                    #print(board)
+                    #print(p, '@', actor_coord, 'considering', vm_set)
+                    #print(board._pieces[actor_coord])
+
+                    for considered_move in vm_set:
+                        try:
+                            considered_ply = Movement(actor_coord, considered_move)
+                            board.perform(considered_ply)
+                        except IllegalMove as e:
+                            #print(e, board._pieces[actor_coord])
+                            continue
+                        else:
+                            print('performed:', p, actor_coord, considered_move)
+                            player_color = next(cycler)
+                            break
+
+            else:
+                player_color = next(cycler)
+
             
-            
+    print('ended')    
     print(board)
     

@@ -27,12 +27,12 @@ class Movement(Ply):
     def __init__(self, origin, dest, leech_from=None):
         if leech_from:
             super().__init__(Rule.Leech_Move, None)
-            self.leech_from = leech_from
         else:
             super().__init__(Rule.Move, None)
             
         self.origin = origin
         self.dest = dest
+        self.leech_from = leech_from
     
     def __str__(self):
         retval = 'Movement from {0} to {1}'.format(self.origin, self.dest)
