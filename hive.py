@@ -269,6 +269,19 @@ class HiveBoard(object):
             if self.hex_distance(ply.origin, ply.dest) == 0:
                 raise IllegalMove(Violation.Did_Not_Move)
                 
+        def check_not_isolated():
+            neighbors = self.hex_neighbors(self.tile_orientation, ply.dest)
+            origin_will_be_vacated = False            
+            
+            if ply.origin in neighbors:            
+                neighbors.remove(ply.origin)
+                if len(self.stack_at(ply.origin)) <= 1:
+                    origin_will_be_vacated = True
+            
+            if not any(p in self._pieces for p in neighbors) and \
+                origin_will_be_vacated:
+                raise IllegalMove(Violation.One_Hive_Rule)      
+                
         def freedom_of_movement(path):
             if self.piece_at(path[0]).insect in [Insect.Grasshopper, Insect.Beetle]:
                 return
@@ -361,6 +374,8 @@ class HiveBoard(object):
                 raise IllegalMove(Violation.No_Movement_Before_Queen_Bee_Placed)
             if not self.one_hive_rule(ply.origin):
                 raise IllegalMove(Violation.One_Hive_Rule)
+                
+            check_not_isolated()
             
             check_insect_moved()
             check_climbing_permitted()
