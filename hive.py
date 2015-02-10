@@ -782,12 +782,12 @@ class HiveBoard(object):
         frontier = Queue()
         checked = set()
         
-        all_pieces = list(self._pieces.keys())
+        if ignored_coord in self._pieces and len(self.stack_at(ignored_coord)) == 1:
+            all_pieces = {k for k in self._pieces.keys() if ignored_coord != k}
+        else:
+            all_pieces = self._pieces.keys()
         
-        if ignored_coord and len(self.stack_at(ignored_coord)) == 1:
-            all_pieces.remove(ignored_coord)
-        
-        start = all_pieces[0]
+        start = list(all_pieces)[0] #choosing a random start point
         frontier.put(start)
         
         while not frontier.empty():
@@ -797,7 +797,7 @@ class HiveBoard(object):
                     frontier.put(n)
                     checked.add(n)
 
-        return checked == set(all_pieces)
+        return checked == all_pieces
 
     def free_pieces(self, color):
         """
