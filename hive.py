@@ -238,8 +238,8 @@ class HiveBoard(object):
         else:
             if ply.rule == Rule.Place:
                 self.place(ply.tile, ply.dest)
-            elif ply.rule in [Rule.Move, Rule.Leech_Move,
-                              Rule.Relocate, Rule.Leech_Relocate]:
+            elif ply.rule in {Rule.Move, Rule.Leech_Move,
+                              Rule.Relocate, Rule.Leech_Relocate}:
                 self.move(ply.origin, ply.dest)
     
             self._log.append(ply)
@@ -272,7 +272,7 @@ class HiveBoard(object):
             If the tournament rule is in effect, disallow
             placing the Queen on either players first ply.
             """
-            if self.ply_number in [0,1] and \
+            if self.ply_number in {0,1} and \
                 not self.queen_opening_allowed and \
                 ply.tile.insect == Insect.Queen:
                 raise IllegalMove(Violation.Queen_Bee_Opening_Prohibited)
@@ -282,7 +282,7 @@ class HiveBoard(object):
             If the player's first 3 plies did not place a Queen,
             force the player's 4th ply to be a Queen.
             """
-            if self.ply_number in [6,7] and \
+            if self.ply_number in {6,7} and \
                 not queen_placed(ply.tile.color) and \
                 ply.tile.insect != Insect.Queen:
                 raise IllegalMove(Violation.Queen_Bee_Must_Be_Played)
@@ -298,9 +298,9 @@ class HiveBoard(object):
         
         def check_correct_distance_for_single_hex_insects():
             """Ensure that pieces that may move only one hex do so"""
-            if ply.tile.insect in [Insect.Queen,
+            if ply.tile.insect in {Insect.Queen,
                                    Insect.Beetle,
-                                   Insect.Pillbug] and \
+                                   Insect.Pillbug} and \
                 self.hex_distance(ply.origin, ply.dest) != 1:
                 raise IllegalMove(Violation.Distance_Must_Be_Exactly_One)
         
@@ -341,7 +341,7 @@ class HiveBoard(object):
             Checks that a piece can physically slide into
             a position each step of the way.
             """
-            if self.piece_at(path[0]).insect in [Insect.Grasshopper, Insect.Beetle]:
+            if self.piece_at(path[0]).insect in {Insect.Grasshopper, Insect.Beetle}:
                 return
 
             path_copy = path[:]
@@ -358,7 +358,7 @@ class HiveBoard(object):
                 except IndexError:
                     break
         
-        def beetle_gate_freedom_of_moment(start, end):
+        def beetle_gate_freedom_of_movement(start, end):
             '''
             Very specific rule: Blocking tiles still restrict 
             climbing if the lower of the two blocking tiles
@@ -403,7 +403,7 @@ class HiveBoard(object):
             Checks that even in transit, a piece is always
             physically adjacent to another piece of the hive.
             """
-            if self.piece_at(start).insect not in [Insect.Beetle, Insect.Queen]:
+            if self.piece_at(start).insect not in {Insect.Beetle, Insect.Queen}:
                 return
             elif end in self._pieces:
                 return #if climbing, not jumping gap
@@ -456,7 +456,7 @@ class HiveBoard(object):
             check_correct_distance_for_spiders(ply.origin, ply.dest)
             
             freedom_of_movement(self.valid_path(ply.origin, ply.dest))
-            beetle_gate_freedom_of_moment(ply.origin, ply.dest)
+            beetle_gate_freedom_of_movement(ply.origin, ply.dest)
             
             jumping_gap(ply.origin, ply.dest)
 
@@ -555,10 +555,10 @@ class HiveBoard(object):
             """
             valid = set()
 
-            for p in [k for k in self._pieces.keys() if k != coords]:
+            for p in {k for k in self._pieces.keys() if k != coords}:
                 valid.update(self.hex_neighbors(self.tile_orientation, p))
 
-            valid.difference_update([k for k in self._pieces.keys()])
+            valid.difference_update({k for k in self._pieces.keys()})
             for i in valid:
                 yield i
         
@@ -710,7 +710,7 @@ class HiveBoard(object):
             
             for n in self.hex_neighbors(self.tile_orientation, current):
                 if n not in came_from:
-                    if insect in [Insect.Spider, Insect.Ant, Insect.Queen, Insect.Pillbug]:                        
+                    if insect in {Insect.Spider, Insect.Ant, Insect.Queen, Insect.Pillbug}:                        
                         if n not in self._pieces and \
                             not freedom_of_movement_violated(current, n):
                             frontier.put(n)
@@ -782,12 +782,12 @@ class HiveBoard(object):
         frontier = Queue()
         checked = set()
         
-        all_pieces = list(self._pieces.keys())
+        if ignored_coord in self._pieces and len(self.stack_at(ignored_coord)) == 1:
+            all_pieces = {k for k in self._pieces.keys() if ignored_coord != k}
+        else:
+            all_pieces = self._pieces.keys()
         
-        if ignored_coord and len(self.stack_at(ignored_coord)) == 1:
-            all_pieces.remove(ignored_coord)
-        
-        start = all_pieces[0]
+        start = list(all_pieces)[0] #choosing a random start point
         frontier.put(start)
         
         while not frontier.empty():
@@ -797,7 +797,7 @@ class HiveBoard(object):
                     frontier.put(n)
                     checked.add(n)
 
-        return checked == set(all_pieces)
+        return checked == all_pieces
 
     def free_pieces(self, color):
         """
