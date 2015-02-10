@@ -564,7 +564,7 @@ class TestHive(unittest.TestCase):
         board.quick_setup(pieces)
         board.perform(hive.Movement((-1,0), (-1,-2)))
     
-    def test_moving_away_from_hive(self):
+    def test_not_isolated(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
         
         pieces = {
