@@ -141,22 +141,23 @@ class Violation(Enum):
     Cannot_Jump_Gaps = 'Pieces may not temporarily be separated from the hive'
 
 class HiveBoard(object):
-    FLAT_BLOCKING = {
-        Flat_Directions.N: (Flat_Directions.NW, Flat_Directions.NE),
-        Flat_Directions.NE: (Flat_Directions.N, Flat_Directions.SE),
-        Flat_Directions.SE: (Flat_Directions.NE, Flat_Directions.S),
-        Flat_Directions.S: (Flat_Directions.SW, Flat_Directions.SE),
-        Flat_Directions.SW: (Flat_Directions.NW, Flat_Directions.S),
-        Flat_Directions.NW: (Flat_Directions.SW, Flat_Directions.N)
-    }
-    
-    POINTED_BLOCKING = {
-        Pointed_Directions.NE: (Pointed_Directions.NW, Pointed_Directions.E),
-        Pointed_Directions.E: (Pointed_Directions.NE, Pointed_Directions.SE),
-        Pointed_Directions.SE: (Pointed_Directions.E, Pointed_Directions.SW),
-        Pointed_Directions.SW: (Pointed_Directions.W, Pointed_Directions.SE),
-        Pointed_Directions.W: (Pointed_Directions.NW, Pointed_Directions.SW),
-        Pointed_Directions.NW: (Pointed_Directions.NE, Pointed_Directions.W)
+    BLOCKING = {
+        'FLAT': {
+            Flat_Directions.N: (Flat_Directions.NW, Flat_Directions.NE),
+            Flat_Directions.NE: (Flat_Directions.N, Flat_Directions.SE),
+            Flat_Directions.SE: (Flat_Directions.NE, Flat_Directions.S),
+            Flat_Directions.S: (Flat_Directions.SW, Flat_Directions.SE),
+            Flat_Directions.SW: (Flat_Directions.NW, Flat_Directions.S),
+            Flat_Directions.NW: (Flat_Directions.SW, Flat_Directions.N)
+        },
+        'POINTED': {
+            Pointed_Directions.NE: (Pointed_Directions.NW, Pointed_Directions.E),
+            Pointed_Directions.E: (Pointed_Directions.NE, Pointed_Directions.SE),
+            Pointed_Directions.SE: (Pointed_Directions.E, Pointed_Directions.SW),
+            Pointed_Directions.SW: (Pointed_Directions.W, Pointed_Directions.SE),
+            Pointed_Directions.W: (Pointed_Directions.NW, Pointed_Directions.SW),
+            Pointed_Directions.NW: (Pointed_Directions.NE, Pointed_Directions.W)
+        }
     }
         
     def __init__(self,
@@ -287,7 +288,7 @@ class HiveBoard(object):
                 return
 
             path_copy = path[:]
-            blockers = self.FLAT_BLOCKING if self.tile_orientation == Flat_Directions else self.POINTED_BLOCKING
+            blockers = self.BLOCKING['FLAT'] if self.tile_orientation == Flat_Directions else self.BLOCKING['POINTED']
             
             while path_copy:
                 try:
@@ -311,7 +312,7 @@ class HiveBoard(object):
             if self.piece_at(start).insect != Insect.Beetle:
                 return
                 
-            blockers = self.FLAT_BLOCKING if self.tile_orientation == Flat_Directions else self.POINTED_BLOCKING
+            blockers = self.BLOCKING['FLAT'] if self.tile_orientation == Flat_Directions else self.BLOCKING['POINTED']
             direction = self.get_direction(start, end, self.tile_orientation)
             
             gate_1 = self.go_direction(start, blockers[direction][0])
@@ -338,7 +339,7 @@ class HiveBoard(object):
                 return #if climbing down, gap irrelevant
                 
             direction = self.get_direction(start, end, self.tile_orientation)            
-            helpers = self.FLAT_BLOCKING if self.tile_orientation == Flat_Directions else self.POINTED_BLOCKING
+            helpers = self.BLOCKING['FLAT'] if self.tile_orientation == Flat_Directions else self.BLOCKING['POINTED']
             if self.go_direction(start, helpers[direction][0]) not in self._pieces and \
                self.go_direction(start, helpers[direction][1]) not in self._pieces:
                 raise IllegalMove(Violation.Cannot_Jump_Gaps)
@@ -573,7 +574,7 @@ class HiveBoard(object):
         http://www.redblobgames.com/pathfinding/a-star/introduction.html
         '''
         def freedom_of_movement_violated(start, end):
-            blockers = self.FLAT_BLOCKING if self.tile_orientation == Flat_Directions else self.POINTED_BLOCKING
+            blockers = self.BLOCKING['FLAT'] if self.tile_orientation == Flat_Directions else self.BLOCKING['POINTED']
             direction = self.get_direction(start, end, self.tile_orientation)
             
             if self.go_direction(start, blockers[direction][0]) in self._pieces and \

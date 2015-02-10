@@ -575,7 +575,7 @@ class TestHive(unittest.TestCase):
         }
         
         board.quick_setup(pieces)
-        print(board)
+
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Movement((-1,-1), (-1,-2)))
         self.assertEqual(e.exception.violation, hive.Violation.One_Hive_Rule)
