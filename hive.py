@@ -262,7 +262,7 @@ class HiveBoard(object):
         
         def check_correct_distance_for_spiders(start, end):
             if ply.tile.insect == Insect.Spider and \
-                self.hex_distance(start, end) != 3:
+                self.hex_distance(start, end) > 3:
                 raise IllegalMove(Violation.Invalid_Distance_Attempted)
 
         def check_insect_moved():
