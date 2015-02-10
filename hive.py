@@ -141,22 +141,23 @@ class Violation(Enum):
     Cannot_Jump_Gaps = 'Pieces may not temporarily be separated from the hive'
 
 class HiveBoard(object):
-    FLAT_BLOCKING = {
-        Flat_Directions.N: (Flat_Directions.NW, Flat_Directions.NE),
-        Flat_Directions.NE: (Flat_Directions.N, Flat_Directions.SE),
-        Flat_Directions.SE: (Flat_Directions.NE, Flat_Directions.S),
-        Flat_Directions.S: (Flat_Directions.SW, Flat_Directions.SE),
-        Flat_Directions.SW: (Flat_Directions.NW, Flat_Directions.S),
-        Flat_Directions.NW: (Flat_Directions.SW, Flat_Directions.N)
-    }
-    
-    POINTED_BLOCKING = {
-        Pointed_Directions.NE: (Pointed_Directions.NW, Pointed_Directions.E),
-        Pointed_Directions.E: (Pointed_Directions.NE, Pointed_Directions.SE),
-        Pointed_Directions.SE: (Pointed_Directions.E, Pointed_Directions.SW),
-        Pointed_Directions.SW: (Pointed_Directions.W, Pointed_Directions.SE),
-        Pointed_Directions.W: (Pointed_Directions.NW, Pointed_Directions.SW),
-        Pointed_Directions.NW: (Pointed_Directions.NE, Pointed_Directions.W)
+    BLOCKING = {
+        'FLAT': {
+            Flat_Directions.N: (Flat_Directions.NW, Flat_Directions.NE),
+            Flat_Directions.NE: (Flat_Directions.N, Flat_Directions.SE),
+            Flat_Directions.SE: (Flat_Directions.NE, Flat_Directions.S),
+            Flat_Directions.S: (Flat_Directions.SW, Flat_Directions.SE),
+            Flat_Directions.SW: (Flat_Directions.NW, Flat_Directions.S),
+            Flat_Directions.NW: (Flat_Directions.SW, Flat_Directions.N)
+        },
+        'POINTED': {
+            Pointed_Directions.NE: (Pointed_Directions.NW, Pointed_Directions.E),
+            Pointed_Directions.E: (Pointed_Directions.NE, Pointed_Directions.SE),
+            Pointed_Directions.SE: (Pointed_Directions.E, Pointed_Directions.SW),
+            Pointed_Directions.SW: (Pointed_Directions.W, Pointed_Directions.SE),
+            Pointed_Directions.W: (Pointed_Directions.NW, Pointed_Directions.SW),
+            Pointed_Directions.NW: (Pointed_Directions.NE, Pointed_Directions.W)
+        }
     }
         
     def __init__(self,
@@ -168,6 +169,7 @@ class HiveBoard(object):
         self.queen_opening_allowed = queen_opening_allowed
 
     def __str__(self):
+        """Produces an ASCII-based map of all the tiles"""
         import hexgrid
         
         hg = hexgrid.HexGrid()
@@ -177,6 +179,7 @@ class HiveBoard(object):
         return str(hg)
         
     def quick_setup(self, arrangement):
+        """Provides an intuitive way to lay out tiles"""
         for coord, piece in arrangement.items():
             c = next(k for k in Color if k.value==piece[0])
             i = next(k for k in Insect if k.value==piece[1])
@@ -184,6 +187,12 @@ class HiveBoard(object):
             self.place(Tile(c,i), coord)
         
     def move(self, origin, dest):
+        """
+        Naively removes the top tile in a stack (or single)
+        and places it in the new destination.  This method
+        does not do any game-rule checking and assumes the move
+        has already been properly validated
+        """
         t = self._pieces[origin].pop()
         if not self._pieces[origin]:
             del self._pieces[origin]
@@ -194,17 +203,31 @@ class HiveBoard(object):
             self._pieces[dest] = [t]
         
     def place(self, tile, coords):
+        """
+        Places a tile at the coordinates specified.  Since placing
+        may never happen atop an existing tile (that's instead
+        a move), it throws an error if attempting to.
+        """
         if coords in self._pieces:
             raise IllegalMove(Violation.May_Not_Place_On_Other_Pieces)
         self._pieces[coords] = [tile]
         
     def piece_at(self, coords):
+        """Returns the tile (or topmost tile) at a given coordinate"""
         return self._pieces[coords][-1]
         
     def stack_at(self, coords):
+        """Returns a list of all tiles at a given coordinate"""
         return self._pieces[coords]
     
     def perform(self, ply):
+        """
+        Convenience function for all game logic.  Accepts a ply
+        (with or without the tile attribute) and checks it against
+        all known rules.  If an invalid move is detected, it will
+        raise the exception, else it will complete the move
+        with the inner functions and add it to the game log.
+        """
         assert(ply.rule in Rule)
         
         try:
@@ -221,8 +244,15 @@ class HiveBoard(object):
     
             self._log.append(ply)
     
-    def validate(self, ply):          
+    def validate(self, ply):
+        """
+        Accepts a play and tests it against all known game rules.
+        If an invalid move is detected, it will raise an exception.
+        If all is well, it will return a (possibly) new ply,
+        but with the .tile attribute properly populated.
+        """
         def queen_placed(color):
+            """Checks if queen is placed for the current color."""
             q = Tile(color, Insect.Queen)
             for stack in self._pieces.values():
                 if q in stack:
@@ -230,6 +260,7 @@ class HiveBoard(object):
             return False
             
         def placed_adjacent_to_opponent(color):
+            """Checks if tile is ilegally placed next to opponent"""
             for c in self.hex_neighbors(self.tile_orientation, ply.dest):
                 if c in self._pieces:
                     if self.piece_at(c).color != color:
@@ -237,23 +268,36 @@ class HiveBoard(object):
             return False
             
         def check_queen_opening():
+            """
+            If the tournament rule is in effect, disallow
+            placing the Queen on either players first ply.
+            """
             if self.ply_number in [0,1] and \
                 not self.queen_opening_allowed and \
                 ply.tile.insect == Insect.Queen:
                 raise IllegalMove(Violation.Queen_Bee_Opening_Prohibited)
             
         def check_queen_down_by_fourth_turn():
+            """
+            If the player's first 3 plies did not place a Queen,
+            force the player's 4th ply to be a Queen.
+            """
             if self.ply_number in [6,7] and \
                 not queen_placed(ply.tile.color) and \
                 ply.tile.insect != Insect.Queen:
                 raise IllegalMove(Violation.Queen_Bee_Must_Be_Played)
             
         def check_climbing_permitted():
+            """
+            If the destination of a piece is atop another piece,
+            ensure the piece is or has the power of a beetle.
+            """
             if ply.dest in self._pieces and \
                 ply.tile.insect != Insect.Beetle:
                 raise IllegalMove(Violation.Insect_Cannot_Climb)
         
         def check_correct_distance_for_single_hex_insects():
+            """Ensure that pieces that may move only one hex do so"""
             if ply.tile.insect in [Insect.Queen,
                                    Insect.Beetle,
                                    Insect.Pillbug] and \
@@ -261,20 +305,47 @@ class HiveBoard(object):
                 raise IllegalMove(Violation.Distance_Must_Be_Exactly_One)
         
         def check_correct_distance_for_spiders(start, end):
+            """
+            Ensure spiders never land farther than 3 spaces
+            away from their starting position
+            """
             if ply.tile.insect == Insect.Spider and \
-                self.hex_distance(start, end) != 3:
+                self.hex_distance(start, end) > 3:
                 raise IllegalMove(Violation.Invalid_Distance_Attempted)
 
         def check_insect_moved():
+            """Ensure no tile ends up where it started"""
             if self.hex_distance(ply.origin, ply.dest) == 0:
                 raise IllegalMove(Violation.Did_Not_Move)
                 
+        def check_not_isolated():
+            """
+            Checks that a piece doesn't simply move off the hive.
+            This check is necessary because the one_hive_rule
+            method only checks the CURRENT state, not the future
+            state."""
+            neighbors = self.hex_neighbors(self.tile_orientation, ply.dest)
+            origin_will_be_vacated = False            
+            
+            if ply.origin in neighbors:            
+                neighbors.remove(ply.origin)
+                if len(self.stack_at(ply.origin)) <= 1:
+                    origin_will_be_vacated = True
+            
+            if not any(p in self._pieces for p in neighbors) and \
+                origin_will_be_vacated:
+                raise IllegalMove(Violation.One_Hive_Rule)      
+                
         def freedom_of_movement(path):
+            """
+            Checks that a piece can physically slide into
+            a position each step of the way.
+            """
             if self.piece_at(path[0]).insect in [Insect.Grasshopper, Insect.Beetle]:
                 return
 
             path_copy = path[:]
-            blockers = self.FLAT_BLOCKING if self.tile_orientation == Flat_Directions else self.POINTED_BLOCKING
+            blockers = self.BLOCKING['FLAT'] if self.tile_orientation == Flat_Directions else self.BLOCKING['POINTED']
             
             while path_copy:
                 try:
@@ -288,7 +359,13 @@ class HiveBoard(object):
                     break
         
         def beetle_gate_freedom_of_moment(start, end):
-            '''per rule: http://boardgamegeek.com/wiki/page/Hive_FAQ#toc9'''
+            '''
+            Very specific rule: Blocking tiles still restrict 
+            climbing if the lower of the two blocking tiles
+            is higher than the higher of origin/dest.
+            
+            For full specifics see the hive faq:            
+            http://boardgamegeek.com/wiki/page/Hive_FAQ#toc9'''
             def height_of(cc):
                 try:
                     return len(self.stack_at(cc))
@@ -298,7 +375,7 @@ class HiveBoard(object):
             if self.piece_at(start).insect != Insect.Beetle:
                 return
                 
-            blockers = self.FLAT_BLOCKING if self.tile_orientation == Flat_Directions else self.POINTED_BLOCKING
+            blockers = self.BLOCKING['FLAT'] if self.tile_orientation == Flat_Directions else self.BLOCKING['POINTED']
             direction = self.get_direction(start, end, self.tile_orientation)
             
             gate_1 = self.go_direction(start, blockers[direction][0])
@@ -308,6 +385,11 @@ class HiveBoard(object):
                 raise IllegalMove(Violation.Freedom_of_Movement)
         
         def check_origin_dest_empty_adjacency(pillbug_coords):
+            """
+            Checks that a pillbugs relocation move is:
+            a) adjacent to the pillbug itself and
+            b) not originating or ending on a stack
+            """
             neighbors = self.hex_neighbors(self.tile_orientation, pillbug_coords)
             if ply.origin not in neighbors or \
                 ply.dest not in neighbors:
@@ -317,6 +399,10 @@ class HiveBoard(object):
                 raise IllegalMove(Violation.Pillbug_Cannot_Touch_Stacks)
                 
         def jumping_gap(start, end):
+            """
+            Checks that even in transit, a piece is always
+            physically adjacent to another piece of the hive.
+            """
             if self.piece_at(start).insect not in [Insect.Beetle, Insect.Queen]:
                 return
             elif end in self._pieces:
@@ -325,7 +411,7 @@ class HiveBoard(object):
                 return #if climbing down, gap irrelevant
                 
             direction = self.get_direction(start, end, self.tile_orientation)            
-            helpers = self.FLAT_BLOCKING if self.tile_orientation == Flat_Directions else self.POINTED_BLOCKING
+            helpers = self.BLOCKING['FLAT'] if self.tile_orientation == Flat_Directions else self.BLOCKING['POINTED']
             if self.go_direction(start, helpers[direction][0]) not in self._pieces and \
                self.go_direction(start, helpers[direction][1]) not in self._pieces:
                 raise IllegalMove(Violation.Cannot_Jump_Gaps)
@@ -361,6 +447,8 @@ class HiveBoard(object):
                 raise IllegalMove(Violation.No_Movement_Before_Queen_Bee_Placed)
             if not self.one_hive_rule(ply.origin):
                 raise IllegalMove(Violation.One_Hive_Rule)
+                
+            check_not_isolated()
             
             check_insect_moved()
             check_climbing_permitted()
@@ -418,24 +506,41 @@ class HiveBoard(object):
             raise RuntimeError
         
     def valid_moves(self, coords, acting_as=None):
+        """Return a generator containing all the hexes
+        which a tile could move to in one turn. This funciton,
+        however, does not take any rules into account so many
+        of them may still throw IllegalMove.
+        
+        This is just a quick method to check plausible moves,
+        and should be less expensive than running all rules against
+        all potential moves. This way, validation can occur at
+        execution of the ply, rather than prior to execution.
+        """
         def adjacent_to_something(ignored_origin, dest):
+            """Check destination has another tile adjacent"""
             for c in self.hex_neighbors(self.tile_orientation, dest):
                 if c in self._pieces and c != ignored_origin:
                     return True
                         
         def queen_bee():
+            """Check destination is empty and adjacent"""
             for direction in self.tile_orientation:
                 c = self.go_direction(coords, direction)
                 if c not in self._pieces and adjacent_to_something(coords, c):
                     yield c
         
         def beetle():
+            """Check destination is adjacent"""
             for direction in self.tile_orientation:
                 c = self.go_direction(coords, direction)
                 if adjacent_to_something(coords, c):
                     yield c
                     
         def grasshopper():
+            """
+            Check destination is a straight line over
+            at least one tile
+            """
             for direction in self.tile_orientation:
                 c = self.go_direction(coords, direction)
                 if c in self._pieces:
@@ -444,6 +549,10 @@ class HiveBoard(object):
                     yield c
         
         def ant():
+            """
+            Returns roughly all tiles around perimeter.
+            Note, some may be FOM-violating
+            """
             valid = set()
 
             for p in [k for k in self._pieces.keys() if k != coords]:
@@ -454,6 +563,10 @@ class HiveBoard(object):
                 yield i
         
         def spider():
+            """
+            Check destination is truly 3 hexes worth of movement,
+            but does not ever revisit a hex.
+            """
             checked = set()
             s1 = set() #1 tile out
             s2 = set() #2 tiles out
@@ -479,6 +592,10 @@ class HiveBoard(object):
                 yield i
                 
         def ladybug():
+            """
+            Check first two tiles are climbed onto, and third tile
+            is climbing down to the base level.
+            """
             checked = set()
             s1 = set() #1 tile out
             s2 = set() #2 tiles out
@@ -507,6 +624,7 @@ class HiveBoard(object):
                 yield i
                 
         def mosquito():
+            """Doesn't do anthing--likely will be removed"""
             valid_dests = set()
             neighbors = self.hex_neighbors(self.tile_orientation, coords)
             gained_movement = set(self.piece_at(n).insect for n in neighbors if n in self._pieces)
@@ -558,7 +676,7 @@ class HiveBoard(object):
         http://www.redblobgames.com/pathfinding/a-star/introduction.html
         '''
         def freedom_of_movement_violated(start, end):
-            blockers = self.FLAT_BLOCKING if self.tile_orientation == Flat_Directions else self.POINTED_BLOCKING
+            blockers = self.BLOCKING['FLAT'] if self.tile_orientation == Flat_Directions else self.BLOCKING['POINTED']
             direction = self.get_direction(start, end, self.tile_orientation)
             
             if self.go_direction(start, blockers[direction][0]) in self._pieces and \
@@ -629,6 +747,8 @@ class HiveBoard(object):
         return list(reversed(path))
         
     def valid_placements(self, color):
+        """
+        Finds all hexes where a new, unused piece can be placed"""
         def adjacent_to_opponent(friendly_color, coord):
             for c in self.hex_neighbors(self.tile_orientation, coord):
                 if c in self._pieces and self.piece_at(c).color != friendly_color:
@@ -649,6 +769,14 @@ class HiveBoard(object):
         return valid
 
     def one_hive_rule(self, ignored_coord=None):
+        """
+        Checks if hive is contiguous. ignored_coord, when provided,
+        should be the moving tile (not the acting tile).
+        
+        If the hive is incomplete while the moving tile is ignored,
+        then it means that the hive is broken 'in transit' and 
+        the move is illegal.
+        """
         from queue import Queue
         
         frontier = Queue()
@@ -672,6 +800,10 @@ class HiveBoard(object):
         return checked == set(all_pieces)
 
     def free_pieces(self, color):
+        """
+        Returns a set of all pieces that will not violate
+        the 'one hive rule' if moved.
+        """
         free = set()
         
         for coords in self._pieces:
@@ -682,6 +814,11 @@ class HiveBoard(object):
         return free
     
     def can_act(self, color):
+        """
+        Checks all possibilities for placing or moving.
+        If this returns False, the player will forego his or her
+        turn
+        """
         if len(self._pieces) == 0:
             return True
         elif len(self._pieces) == 1:
@@ -697,6 +834,13 @@ class HiveBoard(object):
 
     @property
     def winner(self):
+        """
+        Checks if the board has a winner.  If a single move
+        simultaneously surrounds both Queens, instead of returning
+        a color (signifying the winner), it will return False,
+        as in 'it is False there will be a winner'.  All other
+        circumstances return None, to indicate not yet a winner.
+        """
         white_surrounded, black_surrounded = False, False
         
         for coords, stack in self._pieces.items():
@@ -716,10 +860,22 @@ class HiveBoard(object):
         
     @property
     def ply_number(self):
+        """
+        Returns the number of plies performed, as only
+        plies get added to the log (manual move/place does not)
+        """
         return len(self._log)
     
     @staticmethod
     def get_direction(origin, dest, tile_orientation):
+        """
+        Given a start and end, return the respective direction
+        the two hexes are in relation to eachother.
+        
+        If the two hexes are not adjacent, will except
+        RuntimeError, as it does not make logical sense to
+        have a direction that is a distance > 1.
+        """
         delta = (dest[0] - origin[0], dest[1] - origin[1])
         for d in tile_orientation:
             if d.value == delta:
@@ -729,20 +885,32 @@ class HiveBoard(object):
     
     @staticmethod
     def go_direction(coord, direction):
+        """
+        Returns the hex coordinate of a hex one distance away
+        from a given coordinate, in the given direction.
+        """
         return tuple(map(sum, zip(coord, direction.value)))
 
     @classmethod
     def hex_neighbors(cls, tile_orientation, origin):
+        """Returns a set of all hex coords adjacent to a given coord"""
         return set(cls.go_direction(origin, d) for d in tile_orientation)
                         
     @staticmethod
     def hex_distance(origin, dest):
-        #http://www.redblobgames.com/grids/hexagons/#distances
+        """
+        Calculates the distance between two hex coordinates. This
+        number signifies the number of single-hex movements
+        required to get from start to end
+        
+        http://www.redblobgames.com/grids/hexagons/#distances
+        """
         return (abs(origin[0] - dest[0]) + abs(origin[1] - dest[1]) + \
                 abs(origin[0] + origin[1] - dest[0] - dest[1])) / 2
     
     @property
     def radius(self):
+        """Returns the max distance of all pieces from 0,0"""
         maximum = 0
         
         for k in self._pieces:

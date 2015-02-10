@@ -550,6 +550,36 @@ class TestHive(unittest.TestCase):
         with self.assertRaises(hive.IllegalMove) as e:
             board.perform(hive.Movement((-1,-1), (-1,3)))
         self.assertEqual(e.exception.violation, hive.Violation.Invalid_Distance_Attempted)
+        
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ',
+            (-1,0): 'bS',
+            (0,-1): 'wA',
+            (-1,-1): 'bA'
+        }
+        
+        board.quick_setup(pieces)
+        board.perform(hive.Movement((-1,0), (-1,-2)))
+    
+    def test_not_isolated(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ',
+            (0,-1): 'wA',
+            (-1,-1): 'bA'
+        }
+        
+        board.quick_setup(pieces)
+
+        with self.assertRaises(hive.IllegalMove) as e:
+            board.perform(hive.Movement((-1,-1), (-1,-2)))
+        self.assertEqual(e.exception.violation, hive.Violation.One_Hive_Rule)
+    
             
     def test_invalid_paths_physical_slide(self):
         board = hive.HiveBoard(queen_opening_allowed=True)
