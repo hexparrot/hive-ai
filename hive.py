@@ -68,7 +68,7 @@ class Tile(object):
         self._insect = insect
         
     def __eq__(self, other):
-        return self.color == other.color and self.insect == other.insect
+        return self.color is other.color and self.insect is other.insect
     
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -262,7 +262,7 @@ class HiveBoard(object):
         def placed_adjacent_to_opponent(color):
             """Checks if tile is ilegally placed next to opponent"""
             for c,t in self.neighbors(ply.dest):
-                if t and t.color != color:
+                if t and t.color is not color:
                     return True
             return False
             
@@ -273,7 +273,7 @@ class HiveBoard(object):
             """
             if self.ply_number in {0,1} and \
                 not self.queen_opening_allowed and \
-                ply.tile.insect == Insect.Queen:
+                ply.tile.insect is Insect.Queen:
                 raise IllegalMove(Violation.Queen_Bee_Opening_Prohibited)
             
         def check_queen_down_by_fourth_turn():
@@ -283,7 +283,7 @@ class HiveBoard(object):
             """
             if self.ply_number in {6,7} and \
                 not queen_placed(ply.tile.color) and \
-                ply.tile.insect != Insect.Queen:
+                ply.tile.insect is not Insect.Queen:
                 raise IllegalMove(Violation.Queen_Bee_Must_Be_Played)
             
         def check_climbing_permitted():
@@ -292,7 +292,7 @@ class HiveBoard(object):
             ensure the piece is or has the power of a beetle.
             """
             if ply.dest in self._pieces and \
-                ply.tile.insect != Insect.Beetle:
+                ply.tile.insect is not Insect.Beetle:
                 raise IllegalMove(Violation.Insect_Cannot_Climb)
         
         def check_correct_distance_for_single_hex_insects():
@@ -372,7 +372,7 @@ class HiveBoard(object):
                 except KeyError:
                     return 0
             
-            if self.piece_at(start).insect != Insect.Beetle:
+            if self.piece_at(start).insect is not Insect.Beetle:
                 return
                 
             blockers = self.BLOCKING['FLAT'] if self.tile_orientation == Flat_Directions else self.BLOCKING['POINTED']
@@ -519,7 +519,7 @@ class HiveBoard(object):
         def adjacent_to_something(ignored_origin, dest):
             """Check destination has another tile adjacent"""
             for c,t in self.neighbors(dest):
-                if t and c!= ignored_origin:
+                if t and c != ignored_origin:
                     return True
                         
         def queen_bee():
@@ -716,17 +716,17 @@ class HiveBoard(object):
                             not freedom_of_movement_violated(current, n):
                             frontier.put(n)
                             came_from[n] = current
-                    elif insect == Insect.Beetle:
+                    elif insect is Insect.Beetle:
                         frontier.put(n)
                         came_from[n] = current
-                    elif insect == Insect.Grasshopper:
+                    elif insect is Insect.Grasshopper:
                         if n in self._pieces and n!= dest:
                             frontier.put(n)
                             came_from[n] = current
                         elif n not in self._pieces and n == dest:
                             frontier.put(n)
                             came_from[n] = current
-                    elif insect == Insect.Ladybug:
+                    elif insect is Insect.Ladybug:
                         if n == dest:
                             frontier.put(n)
                             came_from[n] = current
@@ -749,10 +749,11 @@ class HiveBoard(object):
         
     def valid_placements(self, color):
         """
-        Finds all hexes where a new, unused piece can be placed"""
+        Finds all hexes where a new, unused piece can be placed
+        """
         def adjacent_to_opponent(friendly_color, coord):
             for c,t in self.neighbors(coord):
-                if t and t.color != friendly_color:
+                if t and t.color is not friendly_color:
                     return True
             return False
         
