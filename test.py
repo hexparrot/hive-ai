@@ -649,10 +649,10 @@ class TestHive(unittest.TestCase):
         
         board.quick_setup(pieces)
         
-        self.assertEqual(board.valid_placements(hive.Color.White),
-                         set([(-1,0), (-1,-1), (0,-2), (1,-2), (1,-1)]))
-        self.assertEqual(board.valid_placements(hive.Color.Black),
-                         set([(-1,2), (-1,3), (0,3), (1,2), (1,1)]))
+        self.assertEqual(set(board.valid_placements(hive.Color.White)),
+                         {(-1,0), (-1,-1), (0,-2), (1,-2), (1,-1)})
+        self.assertEqual(set(board.valid_placements(hive.Color.Black)),
+                         {(-1,2), (-1,3), (0,3), (1,2), (1,1)})
 
     def test_freedom_of_movement(self):
         board = hive.HiveBoard(queen_opening_allowed=True)

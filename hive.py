@@ -518,8 +518,8 @@ class HiveBoard(object):
         """
         def adjacent_to_something(ignored_origin, dest):
             """Check destination has another tile adjacent"""
-            for c in self.hex_neighbors(self.tile_orientation, dest):
-                if c in self._pieces and c != ignored_origin:
+            for c,t in self.neighbors(dest):
+                if t and c!= ignored_origin:
                     return True
                         
         def queen_bee():
@@ -572,20 +572,20 @@ class HiveBoard(object):
             s2 = set() #2 tiles out
             s3 = set() #3 tiles out
 
-            for c in self.hex_neighbors(self.tile_orientation, coords):
-                if c not in self._pieces and adjacent_to_something(coords, c):
+            for c,t in self.neighbors(coords):
+                if not t and adjacent_to_something(coords, c):
                     s1.add(c)
                     checked.add(c)
 
             for i in s1:
-                for c in self.hex_neighbors(self.tile_orientation, i):
-                    if c not in self._pieces and adjacent_to_something(coords, c) and c not in checked:
+                for c,t in self.neighbors(i):
+                    if not t and adjacent_to_something(coords, c) and c not in checked:
                         s2.add(c)
                         checked.add(c)
             
             for i in s2:
-                for c in self.hex_neighbors(self.tile_orientation, i):
-                    if c not in self._pieces and adjacent_to_something(coords, c) and c not in checked:
+                for c,t in self.neighbors(i):
+                    if not t and adjacent_to_something(coords, c) and c not in checked:
                         s3.add(c)
 
             for i in s3:
@@ -603,31 +603,32 @@ class HiveBoard(object):
             
             checked.add(coords) 
             #add initial space because it cannot be crawled back upon
-
-            for c in self.hex_neighbors(self.tile_orientation, coords):
-                if c in self._pieces:
+            
+            for c,t in self.neighbors(coords):
+                if t:
                     s1.add(c)
                     checked.add(c)
 
             for i in s1:
-                for c in self.hex_neighbors(self.tile_orientation, i):
-                    if c in self._pieces and c not in checked:
+                for c,t in self.neighbors(i):
+                    if t and c not in checked:
                         s2.add(c)
                         checked.add(c)
             
             for i in s2:
-                for c in self.hex_neighbors(self.tile_orientation, i):
-                    if c not in self._pieces and adjacent_to_something(coords, c) and c not in checked:
+                for c,t in self.neighbors(i):
+                    if t is None and adjacent_to_something(coords, c) and c not in checked:
                         s3.add(c)
 
             for i in s3:
                 yield i
                 
         def mosquito():
-            """Doesn't do anthing--likely will be removed"""
+            """
+            Checks neighboring hexes to see what powers can be leeched.
+            """
             valid_dests = set()
-            neighbors = self.hex_neighbors(self.tile_orientation, coords)
-            gained_movement = set(self.piece_at(n).insect for n in neighbors if n in self._pieces)
+            gained_movement = set(t.insect for c,t in self.neighbors(coords) if t)
             
             insect_map = {
                 Insect.Queen: queen_bee,
@@ -755,18 +756,15 @@ class HiveBoard(object):
                     return True
             return False
         
-        valid = set()
         checked = set()
         
         for coords in self._pieces.keys():
-            for n in self.hex_neighbors(self.tile_orientation, coords):
-                if n not in checked and \
-                   n not in self._pieces and \
-                   not adjacent_to_opponent(color, n):
-                    valid.add(n)
-                checked.add(n)
-                
-        return valid
+            for c, stack in self.neighbors(coords):
+                if c not in checked and \
+                   stack is None and \
+                   not adjacent_to_opponent(color, c):
+                    yield c
+                checked.add(c)
 
     def one_hive_rule(self, ignored_coord=None):
         """
