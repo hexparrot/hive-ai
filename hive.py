@@ -787,8 +787,8 @@ class HiveBoard(object):
         else:
             all_pieces = self._pieces.keys()
         
-        start = list(all_pieces)[0] #choosing a random start point
-        frontier.put(start)
+        start = iter(all_pieces) #choosing a random start point
+        frontier.put(next(start))
         
         while not frontier.empty():
             current = frontier.get()
@@ -804,14 +804,9 @@ class HiveBoard(object):
         Returns a set of all pieces that will not violate
         the 'one hive rule' if moved.
         """
-        free = set()
-        
         for coords in self._pieces:
-            if self.piece_at(coords).color == color:
-                if self.one_hive_rule(coords):
-                    free.add(coords)
-        
-        return free
+            if self.piece_at(coords).color == color and self.one_hive_rule(coords):
+                yield coords
     
     def can_act(self, color):
         """
@@ -839,13 +834,8 @@ class HiveBoard(object):
                 yield (coord, {i for i, h in enumerate(stack) if h == q})
 
     def neighbors(self, coord):
-        for c in self.tile_orientation:
-            new_coord = self.go_direction(coord, c)
-            p = self._pieces.get(new_coord, None)
-            if p:
-                yield (new_coord, p[-1])
-            else:
-                yield (new_coord, p)
+        for c in self.hex_neighbors(self.tile_orientation, coord):
+            yield (c, self.piece_at(c)) if c in self._pieces else (c, None)
 
     @property
     def winner(self):

@@ -735,8 +735,8 @@ class TestHive(unittest.TestCase):
         
         board.quick_setup(pieces)
         
-        self.assertEqual(board.free_pieces(hive.Color.White), set([(0,-1)]))
-        self.assertEqual(board.free_pieces(hive.Color.Black), set([(0,2)]))
+        self.assertEqual(set(board.free_pieces(hive.Color.White)), {(0,-1)})
+        self.assertEqual(set(board.free_pieces(hive.Color.Black)), {(0,2)})
         
     def test_winner_found(self):
         board = hive.HiveBoard()
