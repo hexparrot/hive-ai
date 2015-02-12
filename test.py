@@ -834,6 +834,38 @@ class TestHive(unittest.TestCase):
         self.assertSetEqual(board.hex_neighbors(board.tile_orientation, (0,0)),
                             set([(0,-1), (1,-1), (1,0), 
                                  (0,1), (-1,1), (-1,0)]))
+                                 
+    def test_find_tiles(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ',
+            (0,-1): 'wB',
+            (0,-2): 'bM'  
+        }
+        
+        board.quick_setup(pieces)
+        self.assertEqual(dict(board.find(hive.Color.White, hive.Insect.Queen)),
+                         {(0,0): {0}})
+        self.assertEqual(dict(board.find(hive.Color.Black, hive.Insect.Mosquito)),
+                         {(0,-2): {0}})
+        self.assertEqual(dict(board.find(hive.Color.Black, hive.Insect.Ant)), {})
+        
+        board.quick_setup({(0,-3): 'wB'})
+        
+        self.assertEqual(dict(board.find(hive.Color.White, hive.Insect.Beetle)),
+                         {
+                          (0,-1): {0},
+                          (0,-3): {0}
+                         })
+        
+        board.move((0,-3), (0,-2))
+        board.move((0,-2), (0,-1))
+        
+        self.assertEqual(dict(board.find(hive.Color.White, hive.Insect.Beetle)),
+                         {(0,-1): {0, 1}})
+
 
 if __name__ == '__main__':
     unittest.main()

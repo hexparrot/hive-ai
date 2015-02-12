@@ -831,6 +831,12 @@ class HiveBoard(object):
                 return True
             else:
                 return False
+                
+    def find(self, color, insect):
+        q = Tile(color, insect)
+        for coord, stack in self._pieces.items():
+            if q in stack:
+                yield (coord, {i for i, h in enumerate(stack) if h == q})
 
     @property
     def winner(self):
