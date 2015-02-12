@@ -68,7 +68,7 @@ class Tile(object):
         self._insect = insect
         
     def __eq__(self, other):
-        return self.color == other.color and self.insect == other.insect
+        return self.color is other.color and self.insect is other.insect
     
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -261,10 +261,9 @@ class HiveBoard(object):
             
         def placed_adjacent_to_opponent(color):
             """Checks if tile is ilegally placed next to opponent"""
-            for c in self.hex_neighbors(self.tile_orientation, ply.dest):
-                if c in self._pieces:
-                    if self.piece_at(c).color != color:
-                        return True
+            for c,t in self.neighbors(ply.dest):
+                if t and t.color is not color:
+                    return True
             return False
             
         def check_queen_opening():
@@ -274,7 +273,7 @@ class HiveBoard(object):
             """
             if self.ply_number in {0,1} and \
                 not self.queen_opening_allowed and \
-                ply.tile.insect == Insect.Queen:
+                ply.tile.insect is Insect.Queen:
                 raise IllegalMove(Violation.Queen_Bee_Opening_Prohibited)
             
         def check_queen_down_by_fourth_turn():
@@ -284,7 +283,7 @@ class HiveBoard(object):
             """
             if self.ply_number in {6,7} and \
                 not queen_placed(ply.tile.color) and \
-                ply.tile.insect != Insect.Queen:
+                ply.tile.insect is not Insect.Queen:
                 raise IllegalMove(Violation.Queen_Bee_Must_Be_Played)
             
         def check_climbing_permitted():
@@ -293,7 +292,7 @@ class HiveBoard(object):
             ensure the piece is or has the power of a beetle.
             """
             if ply.dest in self._pieces and \
-                ply.tile.insect != Insect.Beetle:
+                ply.tile.insect is not Insect.Beetle:
                 raise IllegalMove(Violation.Insect_Cannot_Climb)
         
         def check_correct_distance_for_single_hex_insects():
@@ -315,7 +314,7 @@ class HiveBoard(object):
 
         def check_insect_moved():
             """Ensure no tile ends up where it started"""
-            if self.hex_distance(ply.origin, ply.dest) == 0:
+            if ply.origin == ply.dest:
                 raise IllegalMove(Violation.Did_Not_Move)
                 
         def check_not_isolated():
@@ -323,16 +322,17 @@ class HiveBoard(object):
             Checks that a piece doesn't simply move off the hive.
             This check is necessary because the one_hive_rule
             method only checks the CURRENT state, not the future
-            state."""
-            neighbors = self.hex_neighbors(self.tile_orientation, ply.dest)
+            state.
+            """
+            neighbors = dict(self.neighbors(ply.dest))
             origin_will_be_vacated = False            
             
             if ply.origin in neighbors:            
-                neighbors.remove(ply.origin)
+                del neighbors[ply.origin]
                 if len(self.stack_at(ply.origin)) <= 1:
                     origin_will_be_vacated = True
             
-            if not any(p in self._pieces for p in neighbors) and \
+            if not any(t for c,t in neighbors.items()) and \
                 origin_will_be_vacated:
                 raise IllegalMove(Violation.One_Hive_Rule)      
                 
@@ -372,7 +372,7 @@ class HiveBoard(object):
                 except KeyError:
                     return 0
             
-            if self.piece_at(start).insect != Insect.Beetle:
+            if self.piece_at(start).insect is not Insect.Beetle:
                 return
                 
             blockers = self.BLOCKING['FLAT'] if self.tile_orientation == Flat_Directions else self.BLOCKING['POINTED']
@@ -518,8 +518,8 @@ class HiveBoard(object):
         """
         def adjacent_to_something(ignored_origin, dest):
             """Check destination has another tile adjacent"""
-            for c in self.hex_neighbors(self.tile_orientation, dest):
-                if c in self._pieces and c != ignored_origin:
+            for c,t in self.neighbors(dest):
+                if t and c != ignored_origin:
                     return True
                         
         def queen_bee():
@@ -572,20 +572,20 @@ class HiveBoard(object):
             s2 = set() #2 tiles out
             s3 = set() #3 tiles out
 
-            for c in self.hex_neighbors(self.tile_orientation, coords):
-                if c not in self._pieces and adjacent_to_something(coords, c):
+            for c,t in self.neighbors(coords):
+                if not t and adjacent_to_something(coords, c):
                     s1.add(c)
                     checked.add(c)
 
             for i in s1:
-                for c in self.hex_neighbors(self.tile_orientation, i):
-                    if c not in self._pieces and adjacent_to_something(coords, c) and c not in checked:
+                for c,t in self.neighbors(i):
+                    if not t and adjacent_to_something(coords, c) and c not in checked:
                         s2.add(c)
                         checked.add(c)
             
             for i in s2:
-                for c in self.hex_neighbors(self.tile_orientation, i):
-                    if c not in self._pieces and adjacent_to_something(coords, c) and c not in checked:
+                for c,t in self.neighbors(i):
+                    if not t and adjacent_to_something(coords, c) and c not in checked:
                         s3.add(c)
 
             for i in s3:
@@ -603,31 +603,32 @@ class HiveBoard(object):
             
             checked.add(coords) 
             #add initial space because it cannot be crawled back upon
-
-            for c in self.hex_neighbors(self.tile_orientation, coords):
-                if c in self._pieces:
+            
+            for c,t in self.neighbors(coords):
+                if t:
                     s1.add(c)
                     checked.add(c)
 
             for i in s1:
-                for c in self.hex_neighbors(self.tile_orientation, i):
-                    if c in self._pieces and c not in checked:
+                for c,t in self.neighbors(i):
+                    if t and c not in checked:
                         s2.add(c)
                         checked.add(c)
             
             for i in s2:
-                for c in self.hex_neighbors(self.tile_orientation, i):
-                    if c not in self._pieces and adjacent_to_something(coords, c) and c not in checked:
+                for c,t in self.neighbors(i):
+                    if t is None and adjacent_to_something(coords, c) and c not in checked:
                         s3.add(c)
 
             for i in s3:
                 yield i
                 
         def mosquito():
-            """Doesn't do anthing--likely will be removed"""
+            """
+            Checks neighboring hexes to see what powers can be leeched.
+            """
             valid_dests = set()
-            neighbors = self.hex_neighbors(self.tile_orientation, coords)
-            gained_movement = set(self.piece_at(n).insect for n in neighbors if n in self._pieces)
+            gained_movement = set(t.insect for c,t in self.neighbors(coords) if t)
             
             insect_map = {
                 Insect.Queen: queen_bee,
@@ -715,17 +716,17 @@ class HiveBoard(object):
                             not freedom_of_movement_violated(current, n):
                             frontier.put(n)
                             came_from[n] = current
-                    elif insect == Insect.Beetle:
+                    elif insect is Insect.Beetle:
                         frontier.put(n)
                         came_from[n] = current
-                    elif insect == Insect.Grasshopper:
+                    elif insect is Insect.Grasshopper:
                         if n in self._pieces and n!= dest:
                             frontier.put(n)
                             came_from[n] = current
                         elif n not in self._pieces and n == dest:
                             frontier.put(n)
                             came_from[n] = current
-                    elif insect == Insect.Ladybug:
+                    elif insect is Insect.Ladybug:
                         if n == dest:
                             frontier.put(n)
                             came_from[n] = current
@@ -748,25 +749,23 @@ class HiveBoard(object):
         
     def valid_placements(self, color):
         """
-        Finds all hexes where a new, unused piece can be placed"""
+        Finds all hexes where a new, unused piece can be placed
+        """
         def adjacent_to_opponent(friendly_color, coord):
-            for c in self.hex_neighbors(self.tile_orientation, coord):
-                if c in self._pieces and self.piece_at(c).color != friendly_color:
+            for c,t in self.neighbors(coord):
+                if t and t.color is not friendly_color:
                     return True
             return False
         
-        valid = set()
         checked = set()
         
         for coords in self._pieces.keys():
-            for n in self.hex_neighbors(self.tile_orientation, coords):
-                if n not in checked and \
-                   n not in self._pieces and \
-                   not adjacent_to_opponent(color, n):
-                    valid.add(n)
-                checked.add(n)
-                
-        return valid
+            for c, stack in self.neighbors(coords):
+                if c not in checked and \
+                   stack is None and \
+                   not adjacent_to_opponent(color, c):
+                    yield c
+                checked.add(c)
 
     def one_hive_rule(self, ignored_coord=None):
         """
@@ -787,8 +786,8 @@ class HiveBoard(object):
         else:
             all_pieces = self._pieces.keys()
         
-        start = list(all_pieces)[0] #choosing a random start point
-        frontier.put(start)
+        start = iter(all_pieces) #choosing a random start point
+        frontier.put(next(start))
         
         while not frontier.empty():
             current = frontier.get()
@@ -804,14 +803,9 @@ class HiveBoard(object):
         Returns a set of all pieces that will not violate
         the 'one hive rule' if moved.
         """
-        free = set()
-        
         for coords in self._pieces:
-            if self.piece_at(coords).color == color:
-                if self.one_hive_rule(coords):
-                    free.add(coords)
-        
-        return free
+            if self.piece_at(coords).color == color and self.one_hive_rule(coords):
+                yield coords
     
     def can_act(self, color):
         """
@@ -831,6 +825,16 @@ class HiveBoard(object):
                 return True
             else:
                 return False
+                
+    def find(self, color, insect):
+        q = Tile(color, insect)
+        for coord, stack in self._pieces.items():
+            if q in stack:
+                yield (coord, {i for i, h in enumerate(stack) if h == q})
+
+    def neighbors(self, coord):
+        for c in self.hex_neighbors(self.tile_orientation, coord):
+            yield (c, self.piece_at(c)) if c in self._pieces else (c, None)
 
     @property
     def winner(self):
