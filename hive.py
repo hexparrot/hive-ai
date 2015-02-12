@@ -838,6 +838,15 @@ class HiveBoard(object):
             if q in stack:
                 yield (coord, {i for i, h in enumerate(stack) if h == q})
 
+    def neighbors(self, coord):
+        for c in self.tile_orientation:
+            new_coord = self.go_direction(coord, c)
+            p = self._pieces.get(new_coord, None)
+            if p:
+                yield (new_coord, p[-1])
+            else:
+                yield (new_coord, p)
+
     @property
     def winner(self):
         """

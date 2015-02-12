@@ -865,6 +865,29 @@ class TestHive(unittest.TestCase):
         
         self.assertEqual(dict(board.find(hive.Color.White, hive.Insect.Beetle)),
                          {(0,-1): {0, 1}})
+    
+    def test_neighbors(self):
+        board = hive.HiveBoard(queen_opening_allowed=True)
+        
+        pieces = {
+            (0,0): 'wQ',
+            (0,1): 'bQ',
+            (0,-1): 'wB'
+        }
+        
+        board.quick_setup(pieces)
+        
+        self.assertDictEqual(dict(board.neighbors((0,0))), 
+                             {
+                                 (0,-1): hive.Tile(hive.Color.White,
+                                                   hive.Insect.Beetle),
+                                 (1,-1): None,
+                                 (1,0): None,
+                                 (0,1): hive.Tile(hive.Color.Black,
+                                                  hive.Insect.Queen),
+                                 (-1,1): None,
+                                 (-1,0): None
+                             })
 
 
 if __name__ == '__main__':
