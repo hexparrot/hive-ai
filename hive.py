@@ -261,10 +261,9 @@ class HiveBoard(object):
             
         def placed_adjacent_to_opponent(color):
             """Checks if tile is ilegally placed next to opponent"""
-            for c in self.hex_neighbors(self.tile_orientation, ply.dest):
-                if c in self._pieces:
-                    if self.piece_at(c).color != color:
-                        return True
+            for c,t in self.neighbors(ply.dest):
+                if t and t.color != color:
+                    return True
             return False
             
         def check_queen_opening():
@@ -315,7 +314,7 @@ class HiveBoard(object):
 
         def check_insect_moved():
             """Ensure no tile ends up where it started"""
-            if self.hex_distance(ply.origin, ply.dest) == 0:
+            if ply.origin == ply.dest:
                 raise IllegalMove(Violation.Did_Not_Move)
                 
         def check_not_isolated():
@@ -323,16 +322,17 @@ class HiveBoard(object):
             Checks that a piece doesn't simply move off the hive.
             This check is necessary because the one_hive_rule
             method only checks the CURRENT state, not the future
-            state."""
-            neighbors = self.hex_neighbors(self.tile_orientation, ply.dest)
+            state.
+            """
+            neighbors = dict(self.neighbors(ply.dest))
             origin_will_be_vacated = False            
             
             if ply.origin in neighbors:            
-                neighbors.remove(ply.origin)
+                del neighbors[ply.origin]
                 if len(self.stack_at(ply.origin)) <= 1:
                     origin_will_be_vacated = True
             
-            if not any(p in self._pieces for p in neighbors) and \
+            if not any(t for c,t in neighbors.items()) and \
                 origin_will_be_vacated:
                 raise IllegalMove(Violation.One_Hive_Rule)      
                 
@@ -751,8 +751,8 @@ class HiveBoard(object):
         """
         Finds all hexes where a new, unused piece can be placed"""
         def adjacent_to_opponent(friendly_color, coord):
-            for c in self.hex_neighbors(self.tile_orientation, coord):
-                if c in self._pieces and self.piece_at(c).color != friendly_color:
+            for c,t in self.neighbors(coord):
+                if t and t.color != friendly_color:
                     return True
             return False
         
