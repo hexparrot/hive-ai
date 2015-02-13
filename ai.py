@@ -34,3 +34,23 @@ class GamePieces(object):
         
         friendly = choice([p for p in self._pieces if p.color == color])
         return self._pieces.pop(self._pieces.index(friendly))
+
+class HiveAI(object):
+    OPPONENT = {
+        Color.White: Color.Black,
+        Color.Black: Color.White
+    }
+    
+    def __init__(self, board):
+        self.board = board
+    
+    def opponent_queen(self, color):
+        try:
+            return next(self.board.find(self.OPPONENT[color], Insect.Queen))[0]
+        except StopIteration:
+            return None
+    
+    def empty_hexes_surrounding(self, coord):
+        for c,t in self.board.neighbors(coord):
+            if not t:
+                yield c
