@@ -728,7 +728,15 @@ class TestHive(unittest.TestCase):
         
         pieces = {
             (0,0): 'wQ',
-            (0,1): 'bQ',
+            (0,1): 'bQ'
+        }
+        
+        board.quick_setup(pieces)
+        
+        self.assertEqual(set(board.free_pieces(hive.Color.White)), {(0,0)})
+        self.assertEqual(set(board.free_pieces(hive.Color.Black)), {(0,1)})
+        
+        pieces = {
             (0,-1): 'wB',
             (0,2): 'bM'  
         }

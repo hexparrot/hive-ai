@@ -786,8 +786,9 @@ class HiveBoard(object):
         else:
             all_pieces = self._pieces.keys()
         
-        start = iter(all_pieces) #choosing a random start point
-        frontier.put(next(start))
+        start = next(iter(all_pieces)) #choosing a random start point
+        frontier.put(start)
+        checked.add(start)
         
         while not frontier.empty():
             current = frontier.get()
