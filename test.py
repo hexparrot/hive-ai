@@ -726,23 +726,19 @@ class TestHive(unittest.TestCase):
         board = hive.HiveBoard()
         self.assertIsNone(board.winner)
         
-        pieces = {
-            (0,0): 'wQ',
-            (0,1): 'bQ'
-        }
+        board.quick_setup({(0,0): 'wQ'})
+        self.assertEqual(set(board.free_pieces(hive.Color.White)), set())
+        self.assertEqual(set(board.free_pieces(hive.Color.Black)), set())
         
-        board.quick_setup(pieces)
-        
+        board.quick_setup({(0,1): 'bQ'})
         self.assertEqual(set(board.free_pieces(hive.Color.White)), {(0,0)})
         self.assertEqual(set(board.free_pieces(hive.Color.Black)), {(0,1)})
         
-        pieces = {
-            (0,-1): 'wB',
-            (0,2): 'bM'  
-        }
+        board.quick_setup({(0,-1): 'wB'})
+        self.assertEqual(set(board.free_pieces(hive.Color.White)), {(0,-1)})
+        self.assertEqual(set(board.free_pieces(hive.Color.Black)), {(0,1)})
         
-        board.quick_setup(pieces)
-        
+        board.quick_setup({(0,2): 'bM'})
         self.assertEqual(set(board.free_pieces(hive.Color.White)), {(0,-1)})
         self.assertEqual(set(board.free_pieces(hive.Color.Black)), {(0,2)})
         
